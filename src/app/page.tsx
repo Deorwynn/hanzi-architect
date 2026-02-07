@@ -1,17 +1,17 @@
-"use client";
-import { useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
+'use client';
+import { useState } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 
 export default function SmokeTest() {
-  const [version, setVersion] = useState<string>("Not connected");
+  const [version, setVersion] = useState<string>('Not connected');
 
   const checkTauri = async () => {
     try {
-      const msg = await invoke<string>("greet", { name: "Engineer" });
+      const msg = await invoke<string>('greet', { name: 'Engineer' });
       setVersion(msg);
     } catch (err) {
       console.error(err);
-      setVersion("Error: Tauri not detected");
+      setVersion('Error: Tauri not detected');
     }
   };
 
