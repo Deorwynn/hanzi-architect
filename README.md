@@ -1,49 +1,33 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with
-[`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hánzì Architect
 
-## Getting Started
+A desktop application designed to deconstruct Chinese characters into their
+fundamental radicals and stroke patterns.
 
-First, run the development server:
+## Why this project?
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+I’m building this to explore the "Local-first" software movement. By using
+**Tauri v2** and **SQLite**, the app provides a lightning-fast experience that
+works entirely offline, bypassing the latency of traditional web APIs.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the
-result.
+## 🛠 Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page
-auto-updates as you edit the file.
+- **Frontend:** Next.js 15 (App Router), Tailwind CSS 4
+- **Backend:** Tauri v2 (Rust)
+- **Database:** SQLite (Better-SQLite3 for seeding)
 
-This project uses
-[`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts)
-to automatically optimize and load [Geist](https://vercel.com/font), a new font
-family for Vercel.
+## 🚀 Getting Started
 
-## Learn More
+1. **Prerequisites:** Install [Node.js] and the [Rust toolchain]
+   (https://nodejs.org/) (https://rustup.rs/).
+2. **Install Dependencies:** Run `npm install`.
+3. **Launch Environment:** Run `npm run tauri dev`.
 
-To learn more about Next.js, take a look at the following resources:
+> **Note:** Since this is a Tauri app, a native desktop window will launch
+> separately from your browser.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js
-  features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🏗 Current Progress
 
-You can check out
-[the Next.js GitHub repository](https://github.com/vercel/next.js) - your
-feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the
-[Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme)
-from the creators of Next.js.
-
-Check out our
-[Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying)
-for more details.
+- [x] Next.js 15 + Tauri v2 Bridge established.
+- [x] Rust-to-JS command "Smoke Test" passing.
+- [ ] Initial SQLite schema designed.
+- [ ] Data parsing and seeding (In Progress).
