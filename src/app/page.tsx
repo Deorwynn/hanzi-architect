@@ -1,36 +1,29 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 
-export default function SmokeTest() {
-  const [version, setVersion] = useState<string>('Not connected');
+export default function TestPage() {
+  const [data, setData] = useState<any>(null);
+  const [error, setError] = useState<string>('');
 
-  const checkTauri = async () => {
-    try {
-      const msg = await invoke<string>('greet', { name: 'Engineer' });
-      setVersion(msg);
-    } catch (err) {
-      console.error(err);
-      setVersion('Error: Tauri not detected');
-    }
-  };
+  useEffect(() => {
+    // Attempt to call our Rust command
+    invoke('get_character_details', { target: '一' })
+      .then((result) => setData(result))
+      .catch((err) => setError(err));
+  }, []);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-[#F9F7F2]">
-      <div className="p-8 bg-white rounded-xl shadow-lg border border-gray-200 text-center">
-        <h1 className="text-2xl font-bold text-[#BC2410] mb-4">
-          Hánzì Architect Smoke Test
-        </h1>
-        <p className="mb-6 text-gray-600">
-          Status: <span className="font-mono font-bold">{version}</span>
-        </p>
-        <button
-          onClick={checkTauri}
-          className="px-6 py-2 bg-[#BC2410] text-white rounded-lg hover:bg-[#9a1d0d] transition-colors"
-        >
-          Test Desktop Bridge
-        </button>
-      </div>
-    </main>
+    <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+      <h1>Backend Bridge Test</h1>
+      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+      {data ? (
+        <pre style={{ background: '#f4f4f4', padding: '10px' }}>
+          {JSON.stringify(data, null, 2)}
+        </pre>
+      ) : (
+        <p>Loading data from Rust...</p>
+      )}
+    </div>
   );
 }
