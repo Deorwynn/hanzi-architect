@@ -15,6 +15,17 @@ works entirely offline, bypassing the latency of traditional web APIs.
 - **Backend:** Tauri v2 (Rust)
 - **Database:** SQLite (Better-SQLite3 for seeding)
 
+## Project Structure
+
+### 📂 Data & Persistence
+
+- **Source Data:** `data/dictionary.txt` is included to facilitate the initial
+  database seeding.
+- **Local-First Philosophy:** The application is designed to be fully functional
+  offline. By shipping with a pre-populated SQLite database, users have instant
+  access to 9,500+ character decompositions without needing an internet
+  connection or external API calls.
+
 ## 🚀 Getting Started
 
 1. **Prerequisites:** Install [Node.js] and the [Rust toolchain]
