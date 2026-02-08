@@ -36,9 +36,21 @@ works entirely offline, bypassing the latency of traditional web APIs.
 > **Note:** Since this is a Tauri app, a native desktop window will launch
 > separately from your browser.
 
+## ✨ Key Features
+
+- **Architectural UI:** A "Blueprint" themed interface focused on clarity and
+  structural analysis.
+- **IPC Bridge:** High-performance asynchronous communication between Next.js
+  and Rust.
+- **Type Safety:** Shared TypeScript interfaces ensuring data integrity from
+  database to display.
+
 ## 🏗 Current Progress
 
 - [x] Next.js 15 + Tauri v2 Bridge established.
-- [x] Rust-to-JS command "Smoke Test" passing.
-- [ ] Initial SQLite schema designed.
-- [ ] Data parsing and seeding (In Progress).
+- [x] SQLite schema designed and 9,500+ records seeded.
+- [x] Robust Rust-side path resolution for dev/prod environments.
+- [x] Metadata visualization system (MetadataCard UI).
+- [ ] Character Hero Showcase (In Progress).
+- [ ] LocalStorage-based search history.
+- [ ] Character component decomposition.
