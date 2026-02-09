@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { CharacterData } from '../types/database';
 import MetadataCard from '../components/ui/MetadataCard';
+import CharacterHero from '../components/ui/CharacterHero';
 
 /**
  * Main application dashboard for Hánzì Architect.
@@ -54,10 +55,10 @@ export default function HanziArchitect() {
         }}
       />
 
-      <main className="relative z-10 max-w-5xl mx-auto px-6 py-12">
+      <main className="relative z-10 max-w-6xl mx-auto px-6 py-12">
         {/* Header Section */}
         <header className="text-center mb-12">
-          <h1 className="text-3xl font-bold tracking-widest text-blueprint-accent uppercase mb-2">
+          <h1 className="text-4xl font-bold tracking-widest text-cyan-400 uppercase mb-2">
             Hanzi Architect
           </h1>
           <p className="text-xs text-cyan-500/60 tracking-[0.2em] uppercase">
@@ -66,7 +67,7 @@ export default function HanziArchitect() {
         </header>
 
         {/* Search Bar Area */}
-        <div className="max-w-2xl mx-auto mb-16">
+        <div className="mb-16">
           <form onSubmit={handleSearch} className="relative group">
             <div className="absolute -inset-1 bg-cyan-500/20 rounded-lg blur opacity-25 group-focus-within:opacity-100 transition duration-500"></div>
             <div className="relative flex items-center bg-[#161f27] border border-cyan-500/30 rounded-lg overflow-hidden">
@@ -85,7 +86,6 @@ export default function HanziArchitect() {
               </button>
             </div>
           </form>
-
           {error && (
             <p className="mt-4 text-red-400 text-sm text-center font-mono italic">
               {error}
@@ -93,47 +93,59 @@ export default function HanziArchitect() {
           )}
         </div>
 
-        {/* Placeholder/Initial State */}
-        {!characterData && !loading && (
-          <div className="text-center py-20 border border-dashed border-cyan-500/10 rounded-2xl">
-            <div className="text-cyan-500/20 text-6xl mb-4">叠</div>
-            <h2 className="text-2xl font-light text-cyan-100/50">
-              Explore the Architecture of Chinese Characters
-            </h2>
-            <p className="text-cyan-500/30 max-w-md mx-auto mt-4 text-sm">
-              Search for a character above to analyze its structure and
-              components.
-            </p>
-          </div>
-        )}
-
+        {/* Results Section */}
         {characterData && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <MetadataCard
-              label="Pinyin"
-              value={characterData.pinyin}
-              icon={<span className="text-xs font-mono">PY</span>}
-            />
+          /* Change grid to allow the Hero to stay its fixed size while the metadata expands */
+          <section className="mt-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="grid grid-cols-1 lg:grid-cols-[292px_1fr] gap-8 mb-12 items-start">
+              {/* Left Column: Fixed Width Hero */}
+              <div className="w-full lg:mx-0">
+                <CharacterHero character={characterData.character} />
+              </div>
 
-            <MetadataCard
-              label="Radical"
-              value={characterData.radical}
-              icon={<span className="text-xs font-mono">RD</span>}
-            />
+              {/* Right Column: Metadata Grid that fills remaining space */}
+              <div className="w-full">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <MetadataCard
+                    label="Pinyin"
+                    value={characterData.pinyin}
+                    icon={
+                      <span className="text-[10px] opacity-50">PINYIN</span>
+                    }
+                  />
+                  <MetadataCard
+                    label="Radical"
+                    value={characterData.radical}
+                    icon={<span className="text-[10px] opacity-50">部首</span>}
+                  />
+                  <div className="col-span-1 sm:col-span-2">
+                    <MetadataCard
+                      label="Definition"
+                      value={characterData.definition}
+                      icon={
+                        <span className="text-[10px] opacity-50">MEANING</span>
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
 
-            <MetadataCard
-              label="Definition"
-              value={characterData.definition}
-              className="md:col-span-2"
-              icon={<span className="text-xs font-mono">DF</span>}
-            />
-
-            {/* Debug/Audit Card (shows the internal ID) */}
-            <div className="md:col-span-2 text-center mt-4">
-              <p className="text-[10px] text-cyan-500/20 uppercase tracking-widest">
-                System ID: {characterData.id}
+            {/* Centering the Architect ID for both 1-column and 2-column layouts */}
+            <div className="w-full flex justify-center pt-8">
+              <p className="text-[10px] text-cyan-500/20 uppercase tracking-[0.3em]">
+                ARCHITECT ID: {characterData.id.toString().padStart(4, '0')}
               </p>
             </div>
+          </section>
+        )}
+
+        {/* Placeholder (Visible only if no data) */}
+        {!characterData && !loading && (
+          <div className="text-center py-20 border border-dashed border-cyan-500/10 rounded-2xl">
+            <h2 className="text-xl font-light text-cyan-100/30 italic">
+              System Idle. Awaiting character input...
+            </h2>
           </div>
         )}
       </main>

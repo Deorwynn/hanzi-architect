@@ -51,6 +51,6 @@ works entirely offline, bypassing the latency of traditional web APIs.
 - [x] SQLite schema designed and 9,500+ records seeded.
 - [x] Robust Rust-side path resolution for dev/prod environments.
 - [x] Metadata visualization system (MetadataCard UI).
-- [ ] Character Hero Showcase (In Progress).
+- [x] Character Hero Showcase.
 - [ ] LocalStorage-based search history.
 - [ ] Character component decomposition.
