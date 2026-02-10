@@ -48,8 +48,20 @@ export default function HanziArchitect() {
         target: searchQuery.trim(),
       });
       setCharacterData(result);
-      // Persist the last successful search to localStorage for session restoration
+
+      // Local Storage Management for "Last Session" and "History List"
+      const rawHistory = localStorage.getItem('hanzi_history') || '[]';
+      let history: CharacterData[] = JSON.parse(rawHistory);
+
+      // 1. Remove this character if it already exists (to move it to the front)
+      history = history.filter((item) => item.character !== result.character);
+
+      // 2. Add to start and limit to 10
+      const newHistory = [result, ...history].slice(0, 10);
+
+      // 3. Save both the "last session" AND the "history list"
       localStorage.setItem('hanzi_last_session', JSON.stringify(result));
+      localStorage.setItem('hanzi_history', JSON.stringify(newHistory));
     } catch (err) {
       console.error('IPC Error:', err);
       setError(`Character "${searchQuery}" not found in local records.`);
