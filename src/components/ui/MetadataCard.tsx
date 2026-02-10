@@ -21,7 +21,7 @@ export default function MetadataCard({
   className = '',
 }: MetadataCardProps) {
   return (
-    <div
+    <section
       className={`
       relative bg-gradient-to-br from-[#1a2332] to-[#0f1419] 
       border border-cyan-500/20 rounded-lg p-6
@@ -37,21 +37,21 @@ export default function MetadataCard({
       <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-cyan-400/50" />
 
       {icon && (
-        <div className="mb-3 text-cyan-400 opacity-70 group-hover:opacity-100 transition-opacity">
+        <div
+          className="mb-3 text-cyan-400 opacity-70 group-hover:opacity-100 transition-opacity"
+          aria-hidden="true"
+        >
           {icon}
         </div>
       )}
 
-      <div className="text-[10px] uppercase tracking-[0.2em] text-cyan-400/70 mb-2 font-medium">
+      <h3 className="text-[10px] uppercase tracking-[0.2em] text-cyan-400/70 mb-2 font-stats font-medium">
         {label}
-      </div>
+      </h3>
 
-      <div
-        className="text-xl text-slate-100 font-medium leading-relaxed"
-        style={{ fontFamily: "'Noto Serif SC', serif" }}
-      >
+      <p className="text-xl text-slate-100 font-stats font-medium leading-relaxed">
         {value || '---'}
-      </div>
-    </div>
+      </p>
+    </section>
   );
 }
