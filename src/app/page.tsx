@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { CharacterData } from '../types/database';
 import MetadataCard from '../components/ui/MetadataCard';
@@ -16,6 +16,20 @@ export default function HanziArchitect() {
   );
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('hanzi_last_session');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setCharacterData(parsed);
+        // Optional: Update search bar to match the saved character
+        setSearchQuery(parsed.character);
+      } catch (err) {
+        console.error('Session restore failed', err);
+      }
+    }
+  }, []);
 
   /**
    * Executes a search via the Tauri IPC bridge.
@@ -34,6 +48,8 @@ export default function HanziArchitect() {
         target: searchQuery.trim(),
       });
       setCharacterData(result);
+      // Persist the last successful search to localStorage for session restoration
+      localStorage.setItem('hanzi_last_session', JSON.stringify(result));
     } catch (err) {
       console.error('IPC Error:', err);
       setError(`Character "${searchQuery}" not found in local records.`);
