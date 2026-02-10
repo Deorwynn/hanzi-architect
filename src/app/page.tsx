@@ -4,6 +4,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { CharacterData } from '../types/database';
 import MetadataCard from '../components/ui/MetadataCard';
 import CharacterHero from '../components/ui/CharacterHero';
+import HistoryBar from '../components/ui/HistoryBar';
 
 /**
  * Main application dashboard for Hánzì Architect.
@@ -16,25 +17,63 @@ export default function HanziArchitect() {
   );
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [history, setHistory] = useState<CharacterData[]>([]);
 
+  // Load both Session and History on Mount
   useEffect(() => {
-    const saved = localStorage.getItem('hanzi_last_session');
-    if (saved) {
+    // Restore Last Session
+    const savedLast = localStorage.getItem('hanzi_last_session');
+    if (savedLast) {
       try {
-        const parsed = JSON.parse(saved);
-        setCharacterData(parsed);
-        // Optional: Update search bar to match the saved character
-        setSearchQuery(parsed.character);
+        setCharacterData(JSON.parse(savedLast));
       } catch (err) {
         console.error('Session restore failed', err);
+      }
+    }
+
+    // Restore History List
+    const savedHistory = localStorage.getItem('hanzi_history');
+    if (savedHistory) {
+      try {
+        setHistory(JSON.parse(savedHistory));
+      } catch (err) {
+        console.error('History restore failed', err);
       }
     }
   }, []);
 
   /**
-   * Executes a search via the Tauri IPC bridge.
-   * @param {React.FormEvent} e - Optional form event to prevent default submission behavior.
+   * Logical Handler for selecting from History
    */
+  const handleSelectHistory = (item: CharacterData) => {
+    setCharacterData(item);
+    // Move selected item to the front of history
+    updateHistory(item);
+  };
+
+  /**
+   * Centralized History Management
+   */
+  const updateHistory = (newEntry: CharacterData) => {
+    setHistory((prev) => {
+      const filtered = prev.filter(
+        (item) => item.character !== newEntry.character,
+      );
+      const updated = [newEntry, ...filtered].slice(0, 10);
+      localStorage.setItem('hanzi_history', JSON.stringify(updated));
+      return updated;
+    });
+    localStorage.setItem('hanzi_last_session', JSON.stringify(newEntry));
+  };
+
+  /**
+   * Clear Utility
+   */
+  const clearHistory = () => {
+    localStorage.removeItem('hanzi_history');
+    setHistory([]);
+  };
+
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!searchQuery.trim()) return;
@@ -47,22 +86,9 @@ export default function HanziArchitect() {
       const result = await invoke<CharacterData>('get_character_details', {
         target: searchQuery.trim(),
       });
+
       setCharacterData(result);
-
-      // Local Storage Management for "Last Session" and "History List"
-      const rawHistory = localStorage.getItem('hanzi_history') || '[]';
-      let history: CharacterData[] = JSON.parse(rawHistory);
-
-      // 1. Remove this character if it already exists (to move it to the front)
-      history = history.filter((item) => item.character !== result.character);
-
-      // 2. Add to start and limit to 10
-      const newHistory = [result, ...history].slice(0, 10);
-
-      // 3. Save both the "last session" AND the "history list"
-      localStorage.setItem('hanzi_last_session', JSON.stringify(result));
-      localStorage.setItem('hanzi_history', JSON.stringify(newHistory));
-
+      updateHistory(result);
       setSearchQuery('');
     } catch (err) {
       console.error('IPC Error:', err);
@@ -97,7 +123,7 @@ export default function HanziArchitect() {
         </header>
 
         {/* Search Bar Area */}
-        <div className="mb-16">
+        <div className="mb-8">
           <form onSubmit={handleSearch} className="relative group">
             <div className="absolute -inset-1 bg-cyan-500/20 rounded-lg blur opacity-25 group-focus-within:opacity-100 transition duration-500"></div>
             <div className="relative flex items-center bg-[#161f27] border border-cyan-500/30 rounded-lg overflow-hidden">
@@ -121,19 +147,21 @@ export default function HanziArchitect() {
               {error}
             </p>
           )}
+          <HistoryBar
+            history={history}
+            onSelect={handleSelectHistory}
+            onClear={clearHistory}
+          />
         </div>
 
         {/* Results Section */}
         {characterData && (
-          /* Change grid to allow the Hero to stay its fixed size while the metadata expands */
           <section className="mt-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="grid grid-cols-1 lg:grid-cols-[292px_1fr] gap-8 mb-12 items-start">
-              {/* Left Column: Fixed Width Hero */}
               <div className="w-full lg:mx-0">
                 <CharacterHero character={characterData.character} />
               </div>
 
-              {/* Right Column: Metadata Grid that fills remaining space */}
               <div className="w-full">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <MetadataCard
@@ -161,7 +189,6 @@ export default function HanziArchitect() {
               </div>
             </div>
 
-            {/* Centering the Architect ID for both 1-column and 2-column layouts */}
             <div className="w-full flex justify-center pt-8">
               <p className="text-[10px] text-cyan-500/20 uppercase tracking-[0.3em]">
                 ARCHITECT ID: {characterData.id.toString().padStart(4, '0')}
