@@ -16,8 +16,8 @@ export default function CharacterHero({ character }: CharacterHeroProps) {
       <div className="absolute right-4 top-4 bottom-4 w-px bg-gradient-to-b from-transparent via-cyan-500/30 to-transparent" />
 
       <div
-        className="relative z-10 text-[8rem] sm:text-[10rem] md:text-[12rem] text-cyan-300 leading-none drop-shadow-[0_0_30px_rgba(6,182,212,0.4)]"
-        style={{ fontFamily: "'Noto Serif SC', serif" }}
+        className="relative z-10 font-hero text-[8rem] sm:text-[10rem] md:text-[12rem] text-cyan-300 leading-none drop-shadow-[0_0_30px_rgba(6,182,212,0.4)]"
+        aria-hidden="true"
       >
         {character}
       </div>
