@@ -62,6 +62,8 @@ export default function HanziArchitect() {
       // 3. Save both the "last session" AND the "history list"
       localStorage.setItem('hanzi_last_session', JSON.stringify(result));
       localStorage.setItem('hanzi_history', JSON.stringify(newHistory));
+
+      setSearchQuery('');
     } catch (err) {
       console.error('IPC Error:', err);
       setError(`Character "${searchQuery}" not found in local records.`);
