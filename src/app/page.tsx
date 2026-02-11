@@ -43,12 +43,27 @@ export default function HanziArchitect() {
   }, []);
 
   /**
-   * Logical Handler for selecting from History
+   * Logical Handler for selecting from History.
+   * Re-fetches from SQLite to ensure data is "hydrated" and fresh.
    */
-  const handleSelectHistory = (item: CharacterData) => {
-    setCharacterData(item);
-    // Move selected item to the front of history
-    updateHistory(item);
+  const handleSelectHistory = async (item: CharacterData) => {
+    setLoading(true);
+    try {
+      const freshData = await invoke<CharacterData>('get_character_details', {
+        target: item.character,
+      });
+
+      setCharacterData(freshData);
+
+      updateHistory(freshData);
+    } catch (err) {
+      console.error('Failed to hydrate history item:', err);
+
+      setCharacterData(item);
+      updateHistory(item);
+    } finally {
+      setLoading(false);
+    }
   };
 
   /**

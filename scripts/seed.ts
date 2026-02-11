@@ -3,17 +3,22 @@ import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
 
+import rawHskMap from '../data/hsk30_map.json';
+const hskMap = rawHskMap as Record<string, number>;
+
 const db = new Database('hanzi.db');
 
 // Initialize schema with a fresh state for each seeding run
 db.exec(`
-  DROP TABLE IF EXISTS characters;
-  CREATE TABLE characters (
+  CREATE TABLE IF NOT EXISTS characters (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    character TEXT NOT NULL UNIQUE,
+    character TEXT NOT NULL,
     definition TEXT,
     pinyin TEXT,
-    radical TEXT
+    radical TEXT,
+    hsk_level INTEGER,
+    is_radical BOOLEAN DEFAULT 0,
+    radical_variants TEXT
   );
 `);
 
@@ -30,9 +35,9 @@ async function seed() {
 
   // Reusable prepared statement for insertion performance and SQL injection safety
   const insert = db.prepare(`
-    INSERT INTO characters (character, definition, pinyin, radical)
-    VALUES (@character, @definition, @pinyin, @radical)
-  `);
+  INSERT INTO characters (character, definition, pinyin, radical, hsk_level, is_radical, radical_variants)
+  VALUES (@character, @definition, @pinyin, @radical, @hsk_level, @is_radical, @radical_variants)
+`);
 
   // Wrap insertions in a transaction to minimize disk I/O overhead
   // This reduces processing time from several seconds to milliseconds
@@ -46,13 +51,16 @@ async function seed() {
   for await (const line of rl) {
     // Every line in dictionary.txt is a standalone JSON object (LDJSON format)
     const data = JSON.parse(line);
+    const char = data.character;
 
     batch.push({
-      character: data.character,
+      character: char,
       definition: data.definition || '',
-      // Standardize pinyin as a comma-separated string for easier retrieval
       pinyin: Array.isArray(data.pinyin) ? data.pinyin.join(', ') : '',
       radical: data.radical,
+      hsk_level: hskMap[char] || null,
+      is_radical: char === data.radical ? 1 : 0,
+      radical_variants: data.variants || null,
     });
   }
 
