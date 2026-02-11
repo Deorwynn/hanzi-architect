@@ -178,7 +178,20 @@ export default function HanziArchitect() {
               </div>
 
               <div className="w-full">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <MetadataCard
+                    label="HSK Level"
+                    value={
+                      characterData.hsk_level
+                        ? `HSK ${characterData.hsk_level}`
+                        : 'N/A'
+                    }
+                    icon={
+                      <span className="text-[10px] opacity-50 text-orange-400">
+                        HSK 3.0
+                      </span>
+                    }
+                  />
                   <MetadataCard
                     label="Pinyin"
                     value={characterData.pinyin}
@@ -191,7 +204,8 @@ export default function HanziArchitect() {
                     value={characterData.radical}
                     icon={<span className="text-[10px] opacity-50">部首</span>}
                   />
-                  <div className="col-span-1 sm:col-span-2">
+                  <div className="col-span-1 sm:col-span-3">
+                    {' '}
                     <MetadataCard
                       label="Definition"
                       value={characterData.definition}
