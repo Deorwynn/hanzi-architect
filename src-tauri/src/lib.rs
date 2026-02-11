@@ -73,7 +73,6 @@ fn get_character_details(handle: AppHandle, target: String) -> Result<CharacterD
         })
     }).map_err(|e| format!("Character '{}' not found: {}", target, e))?;
 
-    println!("Found Data: {:?}", char_data.hsk_level);
     Ok(char_data)
 }
 
