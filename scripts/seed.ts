@@ -3,6 +3,9 @@ import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
 
+import rawHskMap from '../data/hsk30_map.json';
+const hskMap = rawHskMap as Record<string, number>;
+
 const db = new Database('hanzi.db');
 
 // Initialize schema with a fresh state for each seeding run
@@ -48,14 +51,15 @@ async function seed() {
   for await (const line of rl) {
     // Every line in dictionary.txt is a standalone JSON object (LDJSON format)
     const data = JSON.parse(line);
+    const char = data.character;
 
     batch.push({
-      character: data.character,
+      character: char,
       definition: data.definition || '',
       pinyin: Array.isArray(data.pinyin) ? data.pinyin.join(', ') : '',
       radical: data.radical,
-      hsk_level: data.hsk || null,
-      is_radical: data.character === data.radical ? 1 : 0,
+      hsk_level: hskMap[char] || null,
+      is_radical: char === data.radical ? 1 : 0,
       radical_variants: data.variants || null,
     });
   }
