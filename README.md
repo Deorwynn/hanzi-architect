@@ -38,19 +38,21 @@ works entirely offline, bypassing the latency of traditional web APIs.
 
 ## ✨ Key Features
 
-- **Architectural UI:** A "Blueprint" themed interface focused on clarity and
-  structural analysis.
+- **Architectural UI:** A "Blueprint" themed interface utilizing Tailwind CSS 4,
+  focused on structural analysis and technical clarity.
+- **Pan-CJK Typography:** Full support for Simplified and Traditional character
+  sets via integrated Noto Serif SC/TC.
+- **Session Persistence:** LocalStorage-backed session restoration and a rolling
+  10-item search history.
 - **IPC Bridge:** High-performance asynchronous communication between Next.js
-  and Rust.
-- **Type Safety:** Shared TypeScript interfaces ensuring data integrity from
-  database to display.
+  and Rust via Tauri's command system.
 
-## 🏗 Current Progress
+## 🏗 Roadmap & Progress
 
 - [x] Next.js 15 + Tauri v2 Bridge established.
 - [x] SQLite schema designed and 9,500+ records seeded.
-- [x] Robust Rust-side path resolution for dev/prod environments.
-- [x] Metadata visualization system (MetadataCard UI).
-- [x] Character Hero Showcase.
-- [ ] LocalStorage-based search history.
-- [ ] Character component decomposition.
+- [x] Pan-CJK Typography implementation (Noto Serif).
+- [x] LocalStorage-based search history & session persistence.
+- [ ] **Next:** HSK Level integration and database migration (HAN-11).
+- [ ] **Next:** Radical Discovery System (Explorer view).
+- [ ] Stroke order animation and SVG-based decomposition.
