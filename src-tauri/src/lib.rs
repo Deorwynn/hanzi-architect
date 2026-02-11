@@ -9,13 +9,16 @@ use std::env;
 
 /// Data transfer object (DTO) for character metadata.
 /// Implements Serialize to allow seamless IPC transmission to the Next.js frontend.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CharacterData {
-    id: i32,
-    character: String,
-    definition: String,
-    pinyin: String,
-    radical: String,
+    pub id: i32,
+    pub character: String,
+    pub pinyin: String,
+    pub radical: String,
+    pub definition: String,
+    pub hsk_level: Option<i32>,
+    pub is_radical: bool,
+    pub radical_variants: Option<String>,
 }
 
 // --- COMMANDS ---
@@ -67,6 +70,9 @@ fn get_character_details(handle: AppHandle, target: String) -> Result<CharacterD
             definition: row.get(2)?,
             pinyin: row.get(3)?,
             radical: row.get(4)?,
+            hsk_level: row.get(5)?, 
+            is_radical: row.get(6)?, 
+            radical_variants: row.get(7)?,
         })
     }).map_err(|e| format!("Character '{}' not found: {}", target, e))?;
 
