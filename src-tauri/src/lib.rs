@@ -18,6 +18,10 @@ pub struct CharacterData {
     pub definition: String,
     pub hsk_level: Option<i32>,
     pub is_radical: bool,
+    pub script_type: Option<String>,
+    pub stroke_count: Option<i32>,
+    pub decomposition: Option<String>,
+    pub variants: Option<String>,
     pub radical_variants: Option<String>,
 }
 
@@ -30,20 +34,20 @@ fn greet(name: &str) -> String {
 }
 
 /// Queries the local SQLite database for specific character details.
-/// 
+///
 /// # Arguments
 /// * `handle` - The Tauri AppHandle used for resource path resolution.
 /// * `target` - The UTF-8 string of the character to look up.
 ///
 /// # Security
-/// Uses parameterized queries to prevent SQL injection and opens the 
+/// Uses parameterized queries to prevent SQL injection and opens the
 /// database in READ_ONLY mode to ensure data integrity during dev/prod.
 #[tauri::command]
 fn get_character_details(handle: AppHandle, target: String) -> Result<CharacterData, String> {
     let db_path = if cfg!(dev) {
         let manifest_dir = env!("CARGO_MANIFEST_DIR");
         std::path::Path::new(manifest_dir)
-            .parent() 
+            .parent()
             .ok_or("Failed to resolve project root")?
             .join("hanzi.db")
     } else {
@@ -53,10 +57,10 @@ fn get_character_details(handle: AppHandle, target: String) -> Result<CharacterD
 
     let conn = Connection::open_with_flags(&db_path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
         .map_err(|e| format!("SQLite connection failed: {}", e))?;
-    
+   
     let mut stmt = conn.prepare(
-        "SELECT id, character, definition, pinyin, radical, hsk_level, is_radical, radical_variants 
-        FROM characters 
+        "SELECT id, character, definition, pinyin, radical, hsk_level, is_radical, script_type, stroke_count, decomposition, variants, radical_variants
+        FROM characters
         WHERE character = ?"
     ).map_err(|e| format!("Query preparation failed: {}", e))?;
 
@@ -67,9 +71,15 @@ fn get_character_details(handle: AppHandle, target: String) -> Result<CharacterD
             definition: row.get::<_, String>(2)?,
             pinyin: row.get::<_, String>(3)?,
             radical: row.get::<_, String>(4)?,
-            hsk_level: row.get::<_, Option<i32>>(5)?, 
-            is_radical: row.get::<_, bool>(6)?, 
-            radical_variants: row.get::<_, Option<String>>(7)?,
+            hsk_level: row.get::<_, Option<i32>>(5)?,
+            is_radical: row.get::<_, bool>(6)?,
+            script_type: row.get::<_, Option<String>>(7)?,
+            stroke_count: row.get::<_, Option<i32>>(8)?,
+            decomposition: row.get::<_, Option<String>>(9)?,
+            variants: row.get::<_, Option<String>>(10)?,
+            radical_variants: row.get::<_, Option<String>>(11)?,
+
+
         })
     }).map_err(|e| format!("Character '{}' not found: {}", target, e))?;
 
@@ -93,7 +103,7 @@ pub fn run() {
                 .build(),
         )
         .invoke_handler(tauri::generate_handler![
-            greet, 
+            greet,
             get_character_details
         ])
         .run(tauri::generate_context!())
