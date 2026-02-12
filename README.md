@@ -51,8 +51,14 @@ works entirely offline, bypassing the latency of traditional web APIs.
 
 - [x] Next.js 15 + Tauri v2 Bridge established.
 - [x] SQLite schema designed and 9,500+ records seeded.
-- [x] Pan-CJK Typography implementation (Noto Serif).
-- [x] LocalStorage-based search history & session persistence.
-- [ ] **Next:** HSK Level integration and database migration (HAN-11).
+- [x] HSK 3.0 Integration & Database Migration (HAN-11).
+- [x] Cyber-Architect UI Polish & HSK Visual Feedback (HAN-22).
 - [ ] **Next:** Radical Discovery System (Explorer view).
 - [ ] Stroke order animation and SVG-based decomposition.
+
+## 🏮 Data Sources
+
+- **HSK 3.0:** Characters mapped against the latest official proficiency
+  standards.
+- **Decomposition:** Based on the CCDL (Chinese Character Decomposition
+  Library).
