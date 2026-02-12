@@ -47,3 +47,63 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.bg-scanline {
+  background:
+    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+    linear-gradient(
+      90deg,
+      rgba(255, 0, 0, 0.06),
+      rgba(0, 255, 0, 0.02),
+      rgba(0, 0, 255, 0.06)
+    );
+  background-size:
+    100% 4px,
+    3px 100%;
+}
+@keyframes scanline-move {
+  0% {
+    transform: translateY(-172px);
+  }
+  100% {
+    transform: translateY(150px);
+  }
+}
+
+@keyframes old-screen-flicker {
+  0% {
+    opacity: 0.12;
+  }
+  20% {
+    opacity: 0.15;
+  }
+  40% {
+    opacity: 0.1;
+  }
+  60% {
+    opacity: 0.18;
+  }
+  80% {
+    opacity: 0.14;
+  }
+  100% {
+    opacity: 0.12;
+  }
+}
+
+.animate-scan {
+  animation: scanline-move 7s linear infinite;
+}
+
+.bg-scanline-pulse {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(182, 242, 252, 0.15) 0%,
+    rgba(34, 211, 238, 0.2) 10%,
+    transparent 70%
+  );
+  height: 25px;
+  width: 130%;
+  left: -15%;
+  filter: blur(2px);
+}

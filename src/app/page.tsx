@@ -174,7 +174,11 @@ export default function HanziArchitect() {
           <section className="mt-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="grid grid-cols-1 lg:grid-cols-[292px_1fr] gap-8 mb-12 items-start">
               <div className="w-full lg:mx-0">
-                <CharacterHero character={characterData.character} />
+                <CharacterHero
+                  character={characterData.character}
+                  hskLevel={characterData.hsk_level}
+                  isRadical={characterData.is_radical}
+                />
               </div>
 
               <div className="w-full">
