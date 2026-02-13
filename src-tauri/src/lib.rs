@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use rusqlite::Connection;
+use rusqlite::{Connection, params_from_iter};
 use tauri::{AppHandle, Manager};
 use tauri_plugin_log::{Target, TargetKind};
 use tauri::path::BaseDirectory;
@@ -25,65 +25,111 @@ pub struct CharacterData {
     pub radical_variants: Option<String>,
 }
 
-// --- COMMANDS ---
+// --- HELPERS ---
 
-/// Health-check command to verify the IPC bridge is functional.
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! Rust backend is responsive.", name)
+/// Internal utility to strip Ideographic Description Characters (IDS) 
+/// from decomposition strings (Unicode range U+2FF0..U+2FFB).
+fn parse_decomposition(decomp: &str) -> Vec<String> {
+    decomp
+        .chars()
+        .filter(|c| !('\u{2FF0}'..='\u{2FFB}').contains(c))
+        .map(|c| c.to_string())
+        .collect()
 }
 
-/// Queries the local SQLite database for specific character details.
-///
-/// # Arguments
-/// * `handle` - The Tauri AppHandle used for resource path resolution.
-/// * `target` - The UTF-8 string of the character to look up.
-///
-/// # Security
-/// Uses parameterized queries to prevent SQL injection and opens the
-/// database in READ_ONLY mode to ensure data integrity during dev/prod.
+// --- COMMANDS ---
+
+/// Retrieves metadata for a single character from the SQLite store.
 #[tauri::command]
 fn get_character_details(handle: AppHandle, target: String) -> Result<CharacterData, String> {
-    let db_path = if cfg!(dev) {
-        let manifest_dir = env!("CARGO_MANIFEST_DIR");
-        std::path::Path::new(manifest_dir)
-            .parent()
-            .ok_or("Failed to resolve project root")?
-            .join("hanzi.db")
-    } else {
-        handle.path().resolve("hanzi.db", BaseDirectory::Resource)
-            .map_err(|e| format!("Resource resolution failed: {}", e))?
-    };
-
+    let db_path = get_db_path(&handle)?;
     let conn = Connection::open_with_flags(&db_path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
-        .map_err(|e| format!("SQLite connection failed: {}", e))?;
+        .map_err(|e| format!("DB Connection Error: {}", e))?;
    
     let mut stmt = conn.prepare(
         "SELECT id, character, definition, pinyin, radical, hsk_level, is_radical, script_type, stroke_count, decomposition, variants, radical_variants
-        FROM characters
-        WHERE character = ?"
-    ).map_err(|e| format!("Query preparation failed: {}", e))?;
+        FROM characters WHERE character = ?"
+    ).map_err(|e| e.to_string())?;
 
-    let char_data = stmt.query_row([target.clone()], |row: &rusqlite::Row| {
+    stmt.query_row([target], |row| {
         Ok(CharacterData {
-            id: row.get::<_, i32>(0)?,
-            character: row.get::<_, String>(1)?,
-            definition: row.get::<_, String>(2)?,
-            pinyin: row.get::<_, String>(3)?,
-            radical: row.get::<_, String>(4)?,
-            hsk_level: row.get::<_, Option<i32>>(5)?,
-            is_radical: row.get::<_, bool>(6)?,
-            script_type: row.get::<_, Option<String>>(7)?,
-            stroke_count: row.get::<_, Option<i32>>(8)?,
-            decomposition: row.get::<_, Option<String>>(9)?,
-            variants: row.get::<_, Option<String>>(10)?,
-            radical_variants: row.get::<_, Option<String>>(11)?,
-
-
+            id: row.get(0)?,
+            character: row.get(1)?,
+            definition: row.get(2)?,
+            pinyin: row.get(3)?,
+            radical: row.get(4)?,
+            hsk_level: row.get(5)?,
+            is_radical: row.get(6)?,
+            script_type: row.get(7)?,
+            stroke_count: row.get(8)?,
+            decomposition: row.get(9)?,
+            variants: row.get(10)?,
+            radical_variants: row.get(11)?,
         })
-    }).map_err(|e| format!("Character '{}' not found: {}", target, e))?;
+    }).map_err(|e| e.to_string())
+}
 
-    Ok(char_data)
+/// Performs a bulk lookup of all components within a character's decomposition.
+/// Leverages dynamic SQL parameterization to minimize IPC round-trips.
+#[tauri::command]
+async fn get_component_details(handle: AppHandle, decomp: String) -> Result<Vec<CharacterData>, String> {
+    let components = parse_decomposition(&decomp);
+    
+    // Performance Guard: Avoid SQL execution if no sub-components exist
+    if components.is_empty() {
+        return Ok(Vec::new());
+    }
+
+    let db_path = get_db_path(&handle)?;
+    let conn = Connection::open_with_flags(&db_path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
+        .map_err(|e| e.to_string())?;
+
+    let vars = vec!["?"; components.len()].join(", ");
+    let query = format!(
+        "SELECT id, character, definition, pinyin, radical, hsk_level, is_radical, script_type, stroke_count, decomposition, variants, radical_variants 
+         FROM characters WHERE character IN ({})", vars
+    );
+
+    let mut stmt = conn.prepare(&query).map_err(|e| e.to_string())?;
+    let params = params_from_iter(components.iter());
+
+    let rows = stmt.query_map(params, |row| {
+        Ok(CharacterData {
+            id: row.get(0)?,
+            character: row.get(1)?,
+            definition: row.get(2)?,
+            pinyin: row.get(3)?,
+            radical: row.get(4)?,
+            hsk_level: row.get(5)?,
+            is_radical: row.get(6)?,
+            script_type: row.get(7)?,
+            stroke_count: row.get(8)?,
+            decomposition: row.get(9)?,
+            variants: row.get(10)?,
+            radical_variants: row.get(11)?,
+        })
+    }).map_err(|e| e.to_string())?;
+
+    let mut results = Vec::new();
+    for row in rows {
+        results.push(row.map_err(|e| e.to_string())?);
+    }
+
+    Ok(results)
+}
+
+/// Centralized path resolver for the SQLite database.
+fn get_db_path(handle: &AppHandle) -> Result<std::path::PathBuf, String> {
+    if cfg!(dev) {
+        let manifest_dir = env!("CARGO_MANIFEST_DIR");
+        Ok(std::path::Path::new(manifest_dir)
+            .parent()
+            .ok_or("Root resolution failed")?
+            .join("hanzi.db"))
+    } else {
+        handle.path().resolve("hanzi.db", BaseDirectory::Resource)
+            .map_err(|e| format!("Resource error: {}", e))
+    }
 }
 
 // --- RUNTIME ---
@@ -92,19 +138,13 @@ fn get_character_details(handle: AppHandle, target: String) -> Result<CharacterD
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
-
-        .plugin(
-            tauri_plugin_log::Builder::new()
-                .targets([
-                    Target::new(TargetKind::Stdout),
-                    Target::new(TargetKind::LogDir { file_name: None }),
-                    Target::new(TargetKind::Webview),
-                ])
-                .build(),
-        )
+        .plugin(tauri_plugin_log::Builder::new().targets([
+            Target::new(TargetKind::Stdout),
+            Target::new(TargetKind::Webview),
+        ]).build())
         .invoke_handler(tauri::generate_handler![
-            greet,
-            get_character_details
+            get_character_details,
+            get_component_details
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
