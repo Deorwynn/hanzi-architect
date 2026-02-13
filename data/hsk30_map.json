@@ -1,42 +1,1647 @@
 {
-  "一": 1,
-  "二": 1,
-  "三": 1,
-  "四": 1,
-  "五": 1,
-  "六": 1,
-  "七": 1,
-  "八": 1,
-  "九": 1,
-  "十": 1,
-  "口": 1,
-  "人": 1,
-  "大": 1,
-  "小": 1,
-  "中": 1,
-  "不": 1,
-  "个": 1,
-  "么": 1,
-  "子": 1,
-  "你": 1,
-  "我": 1,
-  "他": 1,
-  "她": 1,
-  "们": 1,
-  "这": 1,
-  "那": 1,
-  "的": 1,
-  "了": 1,
-  "是": 1,
-  "有": 1,
-  "好": 1,
-  "语": 2,
-  "进": 3,
-  "想": 3,
-  "影": 4,
-  "藏": 5,
-  "魔": 6,
-  "麒": 7,
-  "麟": 8,
-  "攥": 9
+  "一": {
+    "level": 1,
+    "script": "B",
+    "strokes": 1,
+    "decomp": "一",
+    "variant": null
+  },
+  "二": {
+    "level": 1,
+    "script": "B",
+    "strokes": 2,
+    "decomp": "⿱一一",
+    "variant": null
+  },
+  "三": {
+    "level": 1,
+    "script": "B",
+    "strokes": 3,
+    "decomp": "⿱一二",
+    "variant": null
+  },
+  "十": {
+    "level": 1,
+    "script": "B",
+    "strokes": 2,
+    "decomp": "⿻一丨",
+    "variant": null
+  },
+  "人": {
+    "level": 1,
+    "script": "B",
+    "strokes": 2,
+    "decomp": "人",
+    "variant": null
+  },
+  "从": {
+    "level": 1,
+    "script": "S",
+    "strokes": 4,
+    "decomp": "⿰人人",
+    "variant": "從"
+  },
+  "從": {
+    "level": 1,
+    "script": "T",
+    "strokes": 11,
+    "decomp": "彳⿱从止",
+    "variant": "从"
+  },
+  "众": {
+    "level": 1,
+    "script": "S",
+    "strokes": 6,
+    "decomp": "⿱人从",
+    "variant": "衆"
+  },
+  "衆": {
+    "level": 1,
+    "script": "T",
+    "strokes": 12,
+    "decomp": "⿱血乑",
+    "variant": "众"
+  },
+  "好": {
+    "level": 1,
+    "script": "B",
+    "strokes": 6,
+    "decomp": "⿰女子",
+    "variant": null
+  },
+  "你": {
+    "level": 1,
+    "script": "B",
+    "strokes": 7,
+    "decomp": "⿰亻尔",
+    "variant": null
+  },
+  "尔": {
+    "level": 1,
+    "script": "S",
+    "strokes": 5,
+    "decomp": "尔",
+    "variant": "爾"
+  },
+  "爾": {
+    "level": 1,
+    "script": "T",
+    "strokes": 14,
+    "decomp": "⿻爾",
+    "variant": "尔"
+  },
+  "口": {
+    "level": 1,
+    "script": "B",
+    "strokes": 3,
+    "decomp": "口",
+    "variant": null
+  },
+  "日": {
+    "level": 1,
+    "script": "B",
+    "strokes": 4,
+    "decomp": "日",
+    "variant": null
+  },
+  "月": {
+    "level": 1,
+    "script": "B",
+    "strokes": 4,
+    "decomp": "月",
+    "variant": null
+  },
+  "山": {
+    "level": 1,
+    "script": "B",
+    "strokes": 3,
+    "decomp": "山",
+    "variant": null
+  },
+  "水": {
+    "level": 1,
+    "script": "B",
+    "strokes": 4,
+    "decomp": "水",
+    "variant": null
+  },
+  "火": {
+    "level": 1,
+    "script": "B",
+    "strokes": 4,
+    "decomp": "火",
+    "variant": null
+  },
+  "田": {
+    "level": 1,
+    "script": "B",
+    "strokes": 5,
+    "decomp": "田",
+    "variant": null
+  },
+  "木": {
+    "level": 1,
+    "script": "B",
+    "strokes": 4,
+    "decomp": "木",
+    "variant": null
+  },
+  "子": {
+    "level": 1,
+    "script": "B",
+    "strokes": 3,
+    "decomp": "子",
+    "variant": null
+  },
+  "女": {
+    "level": 1,
+    "script": "B",
+    "strokes": 3,
+    "decomp": "女",
+    "variant": null
+  },
+  "妈": {
+    "level": 1,
+    "script": "S",
+    "strokes": 6,
+    "decomp": "⿰女马",
+    "variant": "媽"
+  },
+  "媽": {
+    "level": 1,
+    "script": "T",
+    "strokes": 13,
+    "decomp": "⿰女馬",
+    "variant": "妈"
+  },
+  "马": {
+    "level": 1,
+    "script": "S",
+    "strokes": 3,
+    "decomp": "马",
+    "variant": "馬"
+  },
+  "馬": {
+    "level": 1,
+    "script": "T",
+    "strokes": 10,
+    "decomp": "馬",
+    "variant": "马"
+  },
+  "爸": {
+    "level": 1,
+    "script": "B",
+    "strokes": 8,
+    "decomp": "⿱父巴",
+    "variant": null
+  },
+  "哥": {
+    "level": 1,
+    "script": "B",
+    "strokes": 10,
+    "decomp": "⿱可可",
+    "variant": null
+  },
+  "弟": {
+    "level": 1,
+    "script": "B",
+    "strokes": 7,
+    "decomp": "弟",
+    "variant": null
+  },
+  "姐": {
+    "level": 1,
+    "script": "B",
+    "strokes": 8,
+    "decomp": "⿰女且",
+    "variant": null
+  },
+  "妹": {
+    "level": 1,
+    "script": "B",
+    "strokes": 8,
+    "decomp": "⿰女未",
+    "variant": null
+  },
+  "我": {
+    "level": 1,
+    "script": "B",
+    "strokes": 7,
+    "decomp": "我",
+    "variant": null
+  },
+  "他": {
+    "level": 1,
+    "script": "B",
+    "strokes": 5,
+    "decomp": "⿰亻也",
+    "variant": null
+  },
+  "她": {
+    "level": 1,
+    "script": "B",
+    "strokes": 6,
+    "decomp": "⿰女也",
+    "variant": null
+  },
+  "它": {
+    "level": 1,
+    "script": "B",
+    "strokes": 5,
+    "decomp": "⿱宀匕",
+    "variant": null
+  },
+  "们": {
+    "level": 1,
+    "script": "S",
+    "strokes": 5,
+    "decomp": "⿰亻门",
+    "variant": "們"
+  },
+  "們": {
+    "level": 1,
+    "script": "T",
+    "strokes": 10,
+    "decomp": "⿰亻門",
+    "variant": "们"
+  },
+  "门": {
+    "level": 1,
+    "script": "S",
+    "strokes": 3,
+    "decomp": "门",
+    "variant": "門"
+  },
+  "門": {
+    "level": 1,
+    "script": "T",
+    "strokes": 8,
+    "decomp": "門",
+    "variant": "门"
+  },
+  "这": {
+    "level": 1,
+    "script": "S",
+    "strokes": 7,
+    "decomp": "⿺辶文",
+    "variant": "這"
+  },
+  "這": {
+    "level": 1,
+    "script": "T",
+    "strokes": 11,
+    "decomp": "⿺辶言",
+    "variant": "这"
+  },
+  "那": {
+    "level": 1,
+    "script": "B",
+    "strokes": 6,
+    "decomp": "⿰冉⻏",
+    "variant": null
+  },
+  "哪": {
+    "level": 1,
+    "script": "B",
+    "strokes": 9,
+    "decomp": "⿰口那",
+    "variant": null
+  },
+  "谁": {
+    "level": 1,
+    "script": "S",
+    "strokes": 10,
+    "decomp": "⿰讠隹",
+    "variant": "誰"
+  },
+  "誰": {
+    "level": 1,
+    "script": "T",
+    "strokes": 15,
+    "decomp": "⿰言隹",
+    "variant": "谁"
+  },
+  "什": {
+    "level": 1,
+    "script": "B",
+    "strokes": 4,
+    "decomp": "⿰亻十",
+    "variant": null
+  },
+  "么": {
+    "level": 1,
+    "script": "S",
+    "strokes": 3,
+    "decomp": "么",
+    "variant": "麼"
+  },
+  "麼": {
+    "level": 1,
+    "script": "T",
+    "strokes": 14,
+    "decomp": "⿸麻么",
+    "variant": "么"
+  },
+  "多": {
+    "level": 1,
+    "script": "B",
+    "strokes": 6,
+    "decomp": "⿱夕夕",
+    "variant": null
+  },
+  "少": {
+    "level": 1,
+    "script": "B",
+    "strokes": 4,
+    "decomp": "⿱小丿",
+    "variant": null
+  },
+  "大": {
+    "level": 1,
+    "script": "B",
+    "strokes": 3,
+    "decomp": "大",
+    "variant": null
+  },
+  "小": {
+    "level": 1,
+    "script": "B",
+    "strokes": 3,
+    "decomp": "小",
+    "variant": null
+  },
+  "长": {
+    "level": 1,
+    "script": "S",
+    "strokes": 4,
+    "decomp": "长",
+    "variant": "長"
+  },
+  "長": {
+    "level": 1,
+    "script": "T",
+    "strokes": 8,
+    "decomp": "長",
+    "variant": "长"
+  },
+  "短": {
+    "level": 1,
+    "script": "B",
+    "strokes": 12,
+    "decomp": "⿰矢豆",
+    "variant": null
+  },
+  "高": {
+    "level": 1,
+    "script": "B",
+    "strokes": 10,
+    "decomp": "高",
+    "variant": null
+  },
+  "低": {
+    "level": 1,
+    "script": "B",
+    "strokes": 7,
+    "decomp": "⿰亻氐",
+    "variant": null
+  },
+  "远": {
+    "level": 1,
+    "script": "S",
+    "strokes": 7,
+    "decomp": "⿺辶元",
+    "variant": "遠"
+  },
+  "遠": {
+    "level": 1,
+    "script": "T",
+    "strokes": 13,
+    "decomp": "⿺辶袁",
+    "variant": "远"
+  },
+  "近": {
+    "level": 1,
+    "script": "B",
+    "strokes": 7,
+    "decomp": "⿺辶斤",
+    "variant": null
+  },
+  "去": {
+    "level": 1,
+    "script": "B",
+    "strokes": 5,
+    "decomp": "土厶",
+    "variant": null
+  },
+  "来": {
+    "level": 1,
+    "script": "S",
+    "strokes": 7,
+    "decomp": "来",
+    "variant": "來"
+  },
+  "來": {
+    "level": 1,
+    "script": "T",
+    "strokes": 8,
+    "decomp": "來",
+    "variant": "来"
+  },
+  "回": {
+    "level": 1,
+    "script": "B",
+    "strokes": 6,
+    "decomp": "⿴囗口",
+    "variant": null
+  },
+  "出": {
+    "level": 1,
+    "script": "B",
+    "strokes": 5,
+    "decomp": "⿱山山",
+    "variant": null
+  },
+  "入": {
+    "level": 1,
+    "script": "B",
+    "strokes": 2,
+    "decomp": "入",
+    "variant": null
+  },
+  "上": {
+    "level": 1,
+    "script": "B",
+    "strokes": 3,
+    "decomp": "上",
+    "variant": null
+  },
+  "下": {
+    "level": 1,
+    "script": "B",
+    "strokes": 3,
+    "decomp": "下",
+    "variant": null
+  },
+  "左": {
+    "level": 1,
+    "script": "B",
+    "strokes": 5,
+    "decomp": "⿸𠂇工",
+    "variant": null
+  },
+  "右": {
+    "level": 1,
+    "script": "B",
+    "strokes": 5,
+    "decomp": "⿸𠂇口",
+    "variant": null
+  },
+  "里": {
+    "level": 1,
+    "script": "B",
+    "strokes": 7,
+    "decomp": "⿱田土",
+    "variant": null
+  },
+  "外": {
+    "level": 1,
+    "script": "B",
+    "strokes": 5,
+    "decomp": "⿰夕卜",
+    "variant": null
+  },
+  "前": {
+    "level": 1,
+    "script": "B",
+    "strokes": 9,
+    "decomp": "⿱䒑⿰月刂",
+    "variant": null
+  },
+  "后": {
+    "level": 1,
+    "script": "S",
+    "strokes": 6,
+    "decomp": "⿸𠂆口",
+    "variant": "後"
+  },
+  "後": {
+    "level": 1,
+    "script": "T",
+    "strokes": 9,
+    "decomp": "彳⿱幺夂",
+    "variant": "后"
+  },
+  "坐": {
+    "level": 1,
+    "script": "B",
+    "strokes": 7,
+    "decomp": "⿱⿰人人土",
+    "variant": null
+  },
+  "立": {
+    "level": 1,
+    "script": "B",
+    "strokes": 5,
+    "decomp": "立",
+    "variant": null
+  },
+  "走": {
+    "level": 1,
+    "script": "B",
+    "strokes": 7,
+    "decomp": "⿱土龰",
+    "variant": null
+  },
+  "跑": {
+    "level": 1,
+    "script": "B",
+    "strokes": 12,
+    "decomp": "⿰⻊包",
+    "variant": null
+  },
+  "吃": {
+    "level": 1,
+    "script": "B",
+    "strokes": 6,
+    "decomp": "⿰口乞",
+    "variant": null
+  },
+  "喝": {
+    "level": 1,
+    "script": "B",
+    "strokes": 12,
+    "decomp": "⿰口曷",
+    "variant": null
+  },
+  "说": {
+    "level": 1,
+    "script": "S",
+    "strokes": 9,
+    "decomp": "⿰讠兑",
+    "variant": "說"
+  },
+  "說": {
+    "level": 1,
+    "script": "T",
+    "strokes": 14,
+    "decomp": "⿰言兌",
+    "variant": "说"
+  },
+  "读": {
+    "level": 1,
+    "script": "S",
+    "strokes": 10,
+    "decomp": "⿰讠卖",
+    "variant": "讀"
+  },
+  "讀": {
+    "level": 1,
+    "script": "T",
+    "strokes": 22,
+    "decomp": "⿰言賣",
+    "variant": "读"
+  },
+  "写": {
+    "level": 1,
+    "script": "S",
+    "strokes": 5,
+    "decomp": "⿱冖马",
+    "variant": "寫"
+  },
+  "寫": {
+    "level": 1,
+    "script": "T",
+    "strokes": 15,
+    "decomp": "⿱宀⿰臼焉",
+    "variant": "写"
+  },
+  "看": {
+    "level": 1,
+    "script": "B",
+    "strokes": 9,
+    "decomp": "⿱手目",
+    "variant": null
+  },
+  "听": {
+    "level": 1,
+    "script": "S",
+    "strokes": 7,
+    "decomp": "⿰口斤",
+    "variant": "聽"
+  },
+  "聽": {
+    "level": 1,
+    "script": "T",
+    "strokes": 22,
+    "decomp": "⿰耳德",
+    "variant": "听"
+  },
+  "叫": {
+    "level": 1,
+    "script": "B",
+    "strokes": 5,
+    "decomp": "⿰口丩",
+    "variant": null
+  },
+  "名": {
+    "level": 1,
+    "script": "B",
+    "strokes": 6,
+    "decomp": "⿱夕口",
+    "variant": null
+  },
+  "字": {
+    "level": 1,
+    "script": "B",
+    "strokes": 6,
+    "decomp": "⿱宀子",
+    "variant": null
+  },
+  "岁": {
+    "level": 1,
+    "script": "S",
+    "strokes": 6,
+    "decomp": "⿱山夕",
+    "variant": "歲"
+  },
+  "歲": {
+    "level": 1,
+    "script": "T",
+    "strokes": 13,
+    "decomp": "⿱止𬐩",
+    "variant": "岁"
+  },
+  "家": {
+    "level": 1,
+    "script": "B",
+    "strokes": 10,
+    "decomp": "⿱宀豕",
+    "variant": null
+  },
+  "书": {
+    "level": 1,
+    "script": "S",
+    "strokes": 4,
+    "decomp": "书",
+    "variant": "書"
+  },
+  "書": {
+    "level": 1,
+    "script": "T",
+    "strokes": 10,
+    "decomp": "⿱聿曰",
+    "variant": "书"
+  },
+  "见": {
+    "level": 1,
+    "script": "S",
+    "strokes": 4,
+    "decomp": "见",
+    "variant": "見"
+  },
+  "見": {
+    "level": 1,
+    "script": "T",
+    "strokes": 7,
+    "decomp": "見",
+    "variant": "见"
+  },
+  "谢": {
+    "level": 1,
+    "script": "S",
+    "strokes": 12,
+    "decomp": "⿰讠射",
+    "variant": "謝"
+  },
+  "謝": {
+    "level": 1,
+    "script": "T",
+    "strokes": 17,
+    "decomp": "⿰言射",
+    "variant": "谢"
+  },
+  "分": {
+    "level": 1,
+    "script": "B",
+    "strokes": 4,
+    "decomp": "⿱八刀",
+    "variant": null
+  },
+  "秒": {
+    "level": 1,
+    "script": "B",
+    "strokes": 9,
+    "decomp": "⿰禾少",
+    "variant": null
+  },
+  "点": {
+    "level": 1,
+    "script": "S",
+    "strokes": 9,
+    "decomp": "⿱占灬",
+    "variant": "點"
+  },
+  "點": {
+    "level": 1,
+    "script": "T",
+    "strokes": 17,
+    "decomp": "⿰黑占",
+    "variant": "点"
+  },
+  "刻": {
+    "level": 1,
+    "script": "B",
+    "strokes": 8,
+    "decomp": "⿰亥刂",
+    "variant": null
+  },
+  "时": {
+    "level": 1,
+    "script": "S",
+    "strokes": 7,
+    "decomp": "⿰日寸",
+    "variant": "時"
+  },
+  "時": {
+    "level": 1,
+    "script": "T",
+    "strokes": 10,
+    "decomp": "⿰日寺",
+    "variant": "时"
+  },
+  "钟": {
+    "level": 1,
+    "script": "S",
+    "strokes": 9,
+    "decomp": "⿰钅中",
+    "variant": "鐘"
+  },
+  "鐘": {
+    "level": 1,
+    "script": "T",
+    "strokes": 20,
+    "decomp": "⿰金童",
+    "variant": "钟"
+  },
+  "天": {
+    "level": 1,
+    "script": "B",
+    "strokes": 4,
+    "decomp": "⿱一大",
+    "variant": null
+  },
+  "年": {
+    "level": 1,
+    "script": "B",
+    "strokes": 6,
+    "decomp": "年",
+    "variant": null
+  },
+  "号": {
+    "level": 1,
+    "script": "S",
+    "strokes": 5,
+    "decomp": "⿱口丂",
+    "variant": "號"
+  },
+  "號": {
+    "level": 1,
+    "script": "T",
+    "strokes": 13,
+    "decomp": "⿰号虎",
+    "variant": "号"
+  },
+  "星": {
+    "level": 1,
+    "script": "B",
+    "strokes": 9,
+    "decomp": "⿱日生",
+    "variant": null
+  },
+  "期": {
+    "level": 1,
+    "script": "B",
+    "strokes": 12,
+    "decomp": "⿰其月",
+    "variant": null
+  },
+  "零": {
+    "level": 1,
+    "script": "B",
+    "strokes": 13,
+    "decomp": "⿱雨令",
+    "variant": null
+  },
+  "百": {
+    "level": 1,
+    "script": "B",
+    "strokes": 6,
+    "decomp": "⿱一白",
+    "variant": null
+  },
+  "千": {
+    "level": 1,
+    "script": "B",
+    "strokes": 3,
+    "decomp": "⿱丿十",
+    "variant": null
+  },
+  "万": {
+    "level": 1,
+    "script": "S",
+    "strokes": 3,
+    "decomp": "万",
+    "variant": "萬"
+  },
+  "萬": {
+    "level": 1,
+    "script": "T",
+    "strokes": 12,
+    "decomp": "⿱艹禺",
+    "variant": "万"
+  },
+  "元": {
+    "level": 1,
+    "script": "B",
+    "strokes": 4,
+    "decomp": "二儿",
+    "variant": null
+  },
+  "块": {
+    "level": 1,
+    "script": "S",
+    "strokes": 7,
+    "decomp": "⿰土夬",
+    "variant": "塊"
+  },
+  "塊": {
+    "level": 1,
+    "script": "T",
+    "strokes": 13,
+    "decomp": "⿰土鬼",
+    "variant": "块"
+  },
+  "机": {
+    "level": 1,
+    "script": "S",
+    "strokes": 6,
+    "decomp": "⿰木几",
+    "variant": "機"
+  },
+  "機": {
+    "level": 1,
+    "script": "T",
+    "strokes": 16,
+    "decomp": "⿰木幾",
+    "variant": "机"
+  },
+  "飞": {
+    "level": 1,
+    "script": "S",
+    "strokes": 3,
+    "decomp": "飞",
+    "variant": "飛"
+  },
+  "飛": {
+    "level": 1,
+    "script": "T",
+    "strokes": 9,
+    "decomp": "飛",
+    "variant": "飞"
+  },
+  "车": {
+    "level": 1,
+    "script": "S",
+    "strokes": 4,
+    "decomp": "车",
+    "variant": "車"
+  },
+  "車": {
+    "level": 1,
+    "script": "T",
+    "strokes": 7,
+    "decomp": "車",
+    "variant": "车"
+  },
+  "站": {
+    "level": 1,
+    "script": "B",
+    "strokes": 10,
+    "decomp": "⿰立占",
+    "variant": null
+  },
+  "校": {
+    "level": 1,
+    "script": "B",
+    "strokes": 10,
+    "decomp": "⿰木交",
+    "variant": null
+  },
+  "学": {
+    "level": 1,
+    "script": "S",
+    "strokes": 8,
+    "decomp": "⿱龸子",
+    "variant": "學"
+  },
+  "學": {
+    "level": 1,
+    "script": "T",
+    "strokes": 16,
+    "decomp": "⿱𦥯子",
+    "variant": "学"
+  },
+  "院": {
+    "level": 1,
+    "script": "B",
+    "strokes": 9,
+    "decomp": "⿰⻏完",
+    "variant": null
+  },
+  "医": {
+    "level": 1,
+    "script": "S",
+    "strokes": 7,
+    "decomp": "⿷匚矢",
+    "variant": "醫"
+  },
+  "醫": {
+    "level": 1,
+    "script": "T",
+    "strokes": 18,
+    "decomp": "⿱殹酉",
+    "variant": "医"
+  },
+  "店": {
+    "level": 1,
+    "script": "B",
+    "strokes": 8,
+    "decomp": "⿸广占",
+    "variant": null
+  },
+  "商": {
+    "level": 1,
+    "script": "B",
+    "strokes": 11,
+    "decomp": "⿱亠⿰口内",
+    "variant": null
+  },
+  "钱": {
+    "level": 1,
+    "script": "S",
+    "strokes": 10,
+    "decomp": "⿰钅戋",
+    "variant": "錢"
+  },
+  "錢": {
+    "level": 1,
+    "script": "T",
+    "strokes": 16,
+    "decomp": "⿰金戔",
+    "variant": "钱"
+  },
+  "衣": {
+    "level": 1,
+    "script": "B",
+    "strokes": 6,
+    "decomp": "衣",
+    "variant": null
+  },
+  "服": {
+    "level": 1,
+    "script": "B",
+    "strokes": 8,
+    "decomp": "⿰月卩",
+    "variant": null
+  },
+  "果": {
+    "level": 1,
+    "script": "B",
+    "strokes": 8,
+    "decomp": "⿱田木",
+    "variant": null
+  },
+  "杯": {
+    "level": 1,
+    "script": "B",
+    "strokes": 8,
+    "decomp": "⿰木不",
+    "variant": null
+  },
+  "桌": {
+    "level": 1,
+    "script": "B",
+    "strokes": 10,
+    "decomp": "⿱⺊⿱日木",
+    "variant": null
+  },
+  "椅": {
+    "level": 1,
+    "script": "B",
+    "strokes": 12,
+    "decomp": "⿰木奇",
+    "variant": null
+  },
+  "电": {
+    "level": 1,
+    "script": "S",
+    "strokes": 5,
+    "decomp": "电",
+    "variant": "電"
+  },
+  "電": {
+    "level": 1,
+    "script": "T",
+    "strokes": 13,
+    "decomp": "⿱雨電",
+    "variant": "电"
+  },
+  "脑": {
+    "level": 1,
+    "script": "S",
+    "strokes": 10,
+    "decomp": "⿰月㐫",
+    "variant": "腦"
+  },
+  "腦": {
+    "level": 1,
+    "script": "T",
+    "strokes": 13,
+    "decomp": "⿰月巛⿱囱𠂊",
+    "variant": "脑"
+  },
+  "视": {
+    "level": 1,
+    "script": "S",
+    "strokes": 8,
+    "decomp": "⿰礻见",
+    "variant": "視"
+  },
+  "視": {
+    "level": 1,
+    "script": "T",
+    "strokes": 12,
+    "decomp": "⿰礻見",
+    "variant": "视"
+  },
+  "话": {
+    "level": 1,
+    "script": "S",
+    "strokes": 8,
+    "decomp": "⿰讠舌",
+    "variant": "話"
+  },
+  "話": {
+    "level": 1,
+    "script": "T",
+    "strokes": 13,
+    "decomp": "⿰言舌",
+    "variant": "话"
+  },
+  "猫": {
+    "level": 1,
+    "script": "B",
+    "strokes": 11,
+    "decomp": "⿰⺨苗",
+    "variant": null
+  },
+  "狗": {
+    "level": 1,
+    "script": "B",
+    "strokes": 8,
+    "decomp": "⿰⺨句",
+    "variant": null
+  },
+  "鸟": {
+    "level": 1,
+    "script": "S",
+    "strokes": 5,
+    "decomp": "鸟",
+    "variant": "鳥"
+  },
+  "鳥": {
+    "level": 1,
+    "script": "T",
+    "strokes": 11,
+    "decomp": "鳥",
+    "variant": "鸟"
+  },
+  "鱼": {
+    "level": 1,
+    "script": "S",
+    "strokes": 8,
+    "decomp": "鱼",
+    "variant": "魚"
+  },
+  "魚": {
+    "level": 1,
+    "script": "T",
+    "strokes": 11,
+    "decomp": "魚",
+    "variant": "鱼"
+  },
+  "肉": {
+    "level": 1,
+    "script": "B",
+    "strokes": 6,
+    "decomp": "内",
+    "variant": null
+  },
+  "米": {
+    "level": 1,
+    "script": "B",
+    "strokes": 6,
+    "decomp": "米",
+    "variant": null
+  },
+  "面": {
+    "level": 1,
+    "script": "B",
+    "strokes": 9,
+    "decomp": "面",
+    "variant": null
+  },
+  "菜": {
+    "level": 1,
+    "script": "B",
+    "strokes": 11,
+    "decomp": "⿱艹采",
+    "variant": null
+  },
+  "茶": {
+    "level": 1,
+    "script": "B",
+    "strokes": 9,
+    "decomp": "⿱艹余",
+    "variant": null
+  },
+  "做": {
+    "level": 1,
+    "script": "B",
+    "strokes": 11,
+    "decomp": "⿰亻故",
+    "variant": null
+  },
+  "想": {
+    "level": 1,
+    "script": "B",
+    "strokes": 13,
+    "decomp": "⿱相心",
+    "variant": null
+  },
+  "不": {
+    "level": 1,
+    "script": "B",
+    "strokes": 4,
+    "decomp": "不",
+    "variant": null
+  },
+  "很": {
+    "level": 1,
+    "script": "B",
+    "strokes": 9,
+    "decomp": "⿰彳艮",
+    "variant": null
+  },
+  "太": {
+    "level": 1,
+    "script": "B",
+    "strokes": 4,
+    "decomp": "⿱大丶",
+    "variant": null
+  },
+  "最": {
+    "level": 1,
+    "script": "B",
+    "strokes": 12,
+    "decomp": "⿱日取",
+    "variant": null
+  },
+  "都": {
+    "level": 1,
+    "script": "B",
+    "strokes": 10,
+    "decomp": "⿰者⻏",
+    "variant": null
+  },
+  "也": {
+    "level": 1,
+    "script": "B",
+    "strokes": 3,
+    "decomp": "也",
+    "variant": null
+  },
+  "和": {
+    "level": 1,
+    "script": "B",
+    "strokes": 8,
+    "decomp": "⿰禾口",
+    "variant": null
+  },
+  "的": {
+    "level": 1,
+    "script": "B",
+    "strokes": 8,
+    "decomp": "⿰白勺",
+    "variant": null
+  },
+  "了": {
+    "level": 1,
+    "script": "B",
+    "strokes": 2,
+    "decomp": "了",
+    "variant": null
+  },
+  "吗": {
+    "level": 1,
+    "script": "S",
+    "strokes": 6,
+    "decomp": "⿰口马",
+    "variant": "嗎"
+  },
+  "嗎": {
+    "level": 1,
+    "script": "T",
+    "strokes": 13,
+    "decomp": "⿰口馬",
+    "variant": "吗"
+  },
+  "吧": {
+    "level": 1,
+    "script": "B",
+    "strokes": 7,
+    "decomp": "⿰口巴",
+    "variant": null
+  },
+  "呢": {
+    "level": 1,
+    "script": "B",
+    "strokes": 8,
+    "decomp": "⿰口尼",
+    "variant": null
+  },
+  "在": {
+    "level": 1,
+    "script": "B",
+    "strokes": 6,
+    "decomp": "⿸𠂇土",
+    "variant": null
+  },
+  "有": {
+    "level": 1,
+    "script": "B",
+    "strokes": 6,
+    "decomp": "⿸𠂇月",
+    "variant": null
+  },
+  "没": {
+    "level": 1,
+    "script": "S",
+    "strokes": 7,
+    "decomp": "⿰氵殳",
+    "variant": "沒"
+  },
+  "沒": {
+    "level": 1,
+    "script": "T",
+    "strokes": 7,
+    "decomp": "⿰氵𠬜",
+    "variant": "没"
+  },
+  "个": {
+    "level": 1,
+    "script": "S",
+    "strokes": 3,
+    "decomp": "个",
+    "variant": "個"
+  },
+  "個": {
+    "level": 1,
+    "script": "T",
+    "strokes": 10,
+    "decomp": "⿰亻固",
+    "variant": "个"
+  },
+  "张": {
+    "level": 1,
+    "script": "S",
+    "strokes": 7,
+    "decomp": "⿰弓长",
+    "variant": "張"
+  },
+  "張": {
+    "level": 1,
+    "script": "T",
+    "strokes": 11,
+    "decomp": "⿰弓長",
+    "variant": "张"
+  },
+  "件": {
+    "level": 1,
+    "script": "B",
+    "strokes": 6,
+    "decomp": "⿰亻牛",
+    "variant": null
+  },
+  "些": {
+    "level": 1,
+    "script": "B",
+    "strokes": 8,
+    "decomp": "⿱此二",
+    "variant": null
+  },
+  "黑": {
+    "level": 1,
+    "script": "B",
+    "strokes": 12,
+    "decomp": "⿱里灬",
+    "variant": null
+  },
+  "白": {
+    "level": 1,
+    "script": "B",
+    "strokes": 5,
+    "decomp": "白",
+    "variant": null
+  },
+  "红": {
+    "level": 1,
+    "script": "S",
+    "strokes": 6,
+    "decomp": "⿰纟工",
+    "variant": "紅"
+  },
+  "紅": {
+    "level": 1,
+    "script": "T",
+    "strokes": 9,
+    "decomp": "⿰糹工",
+    "variant": "红"
+  },
+  "蓝": {
+    "level": 1,
+    "script": "S",
+    "strokes": 13,
+    "decomp": "⿱艹监",
+    "variant": "藍"
+  },
+  "藍": {
+    "level": 1,
+    "script": "T",
+    "strokes": 17,
+    "decomp": "⿱艹監",
+    "variant": "蓝"
+  },
+  "绿": {
+    "level": 1,
+    "script": "S",
+    "strokes": 11,
+    "decomp": "⿰纟录",
+    "variant": "綠"
+  },
+  "綠": {
+    "level": 1,
+    "script": "T",
+    "strokes": 14,
+    "decomp": "⿰糹錄",
+    "variant": "绿"
+  },
+  "风": {
+    "level": 1,
+    "script": "S",
+    "strokes": 4,
+    "decomp": "风",
+    "variant": "風"
+  },
+  "風": {
+    "level": 1,
+    "script": "T",
+    "strokes": 9,
+    "decomp": "風",
+    "variant": "风"
+  },
+  "雨": {
+    "level": 1,
+    "script": "B",
+    "strokes": 8,
+    "decomp": "雨",
+    "variant": null
+  },
+  "脸": {
+    "level": 1,
+    "script": "S",
+    "strokes": 11,
+    "decomp": "⿰月佥",
+    "variant": "臉"
+  },
+  "臉": {
+    "level": 1,
+    "script": "T",
+    "strokes": 17,
+    "decomp": "⿰月斂",
+    "variant": "脸"
+  },
+  "眼": {
+    "level": 1,
+    "script": "B",
+    "strokes": 11,
+    "decomp": "⿰目艮",
+    "variant": null
+  },
+  "睛": {
+    "level": 1,
+    "script": "B",
+    "strokes": 13,
+    "decomp": "⿰目青",
+    "variant": null
+  },
+  "手": {
+    "level": 1,
+    "script": "B",
+    "strokes": 4,
+    "decomp": "手",
+    "variant": null
+  },
+  "脚": {
+    "level": 1,
+    "script": "S",
+    "strokes": 11,
+    "decomp": "⿰月却",
+    "variant": "腳"
+  },
+  "腳": {
+    "level": 1,
+    "script": "T",
+    "strokes": 13,
+    "decomp": "⿰月卻",
+    "variant": "脚"
+  },
+  "药": {
+    "level": 1,
+    "script": "S",
+    "strokes": 9,
+    "decomp": "⿱艹约",
+    "variant": "藥"
+  },
+  "藥": {
+    "level": 1,
+    "script": "T",
+    "strokes": 19,
+    "decomp": "⿱艹樂",
+    "variant": "药"
+  },
+  "病": {
+    "level": 1,
+    "script": "B",
+    "strokes": 10,
+    "decomp": "⿸疒丙",
+    "variant": null
+  },
+  "中": {
+    "level": 1,
+    "script": "B",
+    "strokes": 4,
+    "decomp": "中",
+    "variant": null
+  },
+  "国": {
+    "level": 1,
+    "script": "S",
+    "strokes": 8,
+    "decomp": "⿴囗玉",
+    "variant": "國"
+  },
+  "國": {
+    "level": 1,
+    "script": "T",
+    "strokes": 11,
+    "decomp": "⿴囗或",
+    "variant": "国"
+  },
+  "华": {
+    "level": 1,
+    "script": "S",
+    "strokes": 6,
+    "decomp": "⿱化十",
+    "variant": "華"
+  },
+  "華": {
+    "level": 1,
+    "script": "T",
+    "strokes": 11,
+    "decomp": "⿱艹⿻𦍌𠂇",
+    "variant": "华"
+  },
+  "对": {
+    "level": 1,
+    "script": "S",
+    "strokes": 5,
+    "decomp": "⿰又寸",
+    "variant": "對"
+  },
+  "對": {
+    "level": 1,
+    "script": "T",
+    "strokes": 14,
+    "decomp": "⿰丵寸",
+    "variant": "对"
+  },
+  "起": {
+    "level": 1,
+    "script": "B",
+    "strokes": 10,
+    "decomp": "⿺走巳",
+    "variant": null
+  },
+  "关": {
+    "level": 1,
+    "script": "S",
+    "strokes": 6,
+    "decomp": "⿱丷天",
+    "variant": "關"
+  },
+  "關": {
+    "level": 1,
+    "script": "T",
+    "strokes": 19,
+    "decomp": "⿵門𢇇",
+    "variant": "关"
+  },
+  "系": {
+    "level": 1,
+    "script": "S",
+    "strokes": 7,
+    "decomp": "⿱丿糸",
+    "variant": "係"
+  },
+  "係": {
+    "level": 1,
+    "script": "T",
+    "strokes": 9,
+    "decomp": "⿰亻系",
+    "variant": "系"
+  },
+  "再": {
+    "level": 1,
+    "script": "B",
+    "strokes": 6,
+    "decomp": "再",
+    "variant": null
+  },
+  "请": {
+    "level": 1,
+    "script": "S",
+    "strokes": 10,
+    "decomp": "⿰讠青",
+    "variant": "請"
+  },
+  "請": {
+    "level": 1,
+    "script": "T",
+    "strokes": 15,
+    "decomp": "⿰言青",
+    "variant": "请"
+  },
+  "问": {
+    "level": 1,
+    "script": "S",
+    "strokes": 6,
+    "decomp": "⿵门口",
+    "variant": "問"
+  },
+  "問": {
+    "level": 1,
+    "script": "T",
+    "strokes": 11,
+    "decomp": "⿵門口",
+    "variant": "问"
+  },
+  "等": {
+    "level": 1,
+    "script": "B",
+    "strokes": 12,
+    "decomp": "⿱⺮寺",
+    "variant": null
+  },
+  "找": {
+    "level": 1,
+    "script": "B",
+    "strokes": 7,
+    "decomp": "⿰⺘戈",
+    "variant": null
+  },
+  "办": {
+    "level": 1,
+    "script": "S",
+    "strokes": 4,
+    "decomp": "办",
+    "variant": "辦"
+  },
+  "辦": {
+    "level": 1,
+    "script": "T",
+    "strokes": 16,
+    "decomp": "⿲辛力辛",
+    "variant": "办"
+  }
 }

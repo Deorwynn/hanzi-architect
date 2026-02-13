@@ -4,7 +4,16 @@ import path from 'path';
 import readline from 'readline';
 
 import rawHskMap from '../data/hsk30_map.json';
-const hskMap = rawHskMap as Record<string, number>;
+
+interface HskEntry {
+  level: number;
+  script: string;
+  strokes: number;
+  decomp: string;
+  variant: string | null;
+}
+
+const hskMap = rawHskMap as unknown as Record<string, HskEntry>;
 
 const db = new Database('hanzi.db');
 
@@ -18,6 +27,10 @@ db.exec(`
     radical TEXT,
     hsk_level INTEGER,
     is_radical BOOLEAN DEFAULT 0,
+    script_type TEXT,
+    stroke_count INTEGER,
+    decomposition TEXT,
+    variants TEXT,
     radical_variants TEXT
   );
 `);
@@ -35,8 +48,8 @@ async function seed() {
 
   // Reusable prepared statement for insertion performance and SQL injection safety
   const insert = db.prepare(`
-  INSERT INTO characters (character, definition, pinyin, radical, hsk_level, is_radical, radical_variants)
-  VALUES (@character, @definition, @pinyin, @radical, @hsk_level, @is_radical, @radical_variants)
+  INSERT INTO characters (character, definition, pinyin, radical, hsk_level, is_radical, script_type, stroke_count, decomposition, variants, radical_variants)
+  VALUES (@character, @definition, @pinyin, @radical, @hsk_level, @is_radical, @script_type, @stroke_count, @decomposition, @variants, @radical_variants)
 `);
 
   // Wrap insertions in a transaction to minimize disk I/O overhead
@@ -58,9 +71,13 @@ async function seed() {
       definition: data.definition || '',
       pinyin: Array.isArray(data.pinyin) ? data.pinyin.join(', ') : '',
       radical: data.radical,
-      hsk_level: hskMap[char] || null,
+      hsk_level: hskMap[char]?.level || null,
       is_radical: char === data.radical ? 1 : 0,
-      radical_variants: data.variants || null,
+      script_type: hskMap[char]?.script || null,
+      stroke_count: hskMap[char]?.strokes || null,
+      decomposition: hskMap[char]?.decomp || null,
+      variants: hskMap[char]?.variant || null,
+      radical_variants: data.radical_variants || null,
     });
   }
 
