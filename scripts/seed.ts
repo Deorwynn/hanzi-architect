@@ -13,7 +13,7 @@ interface HskEntry {
   variant: string | null;
 }
 
-const hskMap = rawHskMap as Record<string, HskEntry>;
+const hskMap = rawHskMap as unknown as Record<string, HskEntry>;
 
 const db = new Database('hanzi.db');
 
