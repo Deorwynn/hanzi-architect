@@ -5,6 +5,7 @@ import { CharacterData } from '../types/database';
 import MetadataCard from '../components/ui/MetadataCard';
 import CharacterHero from '../components/ui/CharacterHero';
 import HistoryBar from '../components/ui/HistoryBar';
+import DecompositionGrid from '../components/ui/DecompositionGrid';
 
 /**
  * Main application dashboard for Hánzì Architect.
@@ -109,6 +110,29 @@ export default function HanziArchitect() {
       console.error('IPC Error:', err);
       setError(`Character "${searchQuery}" not found in local records.`);
       setCharacterData(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Drill-down handler: When a component in the grid is clicked,
+   * we treat it as a new search.
+   */
+  const handleComponentClick = async (char: string) => {
+    setSearchQuery(char);
+    setLoading(true);
+    setError('');
+    try {
+      const result = await invoke<CharacterData>('get_character_details', {
+        target: char,
+      });
+      setCharacterData(result);
+      updateHistory(result);
+      setSearchQuery('');
+    } catch (err) {
+      console.error('Drill-down failed:', err);
+      setError(`Character "${char}" not found.`);
     } finally {
       setLoading(false);
     }
@@ -219,6 +243,10 @@ export default function HanziArchitect() {
                     />
                   </div>
                 </div>
+                <DecompositionGrid
+                  decomposition={characterData.decomposition}
+                  onComponentClick={handleComponentClick}
+                />
               </div>
             </div>
 
