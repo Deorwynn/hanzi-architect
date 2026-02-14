@@ -107,3 +107,23 @@ body {
   left: -15%;
   filter: blur(2px);
 }
+
+@keyframes chip-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  33% {
+    opacity: 0.8;
+  }
+  66% {
+    opacity: 0.95;
+  }
+  70% {
+    opacity: 0.7;
+  }
+}
+
+.animate-flicker {
+  animation: chip-flicker 3s linear infinite;
+}
