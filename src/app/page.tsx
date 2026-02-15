@@ -6,6 +6,7 @@ import MetadataCard from '../components/ui/MetadataCard';
 import CharacterHero from '../components/ui/CharacterHero';
 import HistoryBar from '../components/ui/HistoryBar';
 import DecompositionGrid from '../components/ui/DecompositionGrid';
+import AdminPanel from '@/components/AdminPanel';
 
 /**
  * Main application dashboard for Hánzì Architect.
@@ -19,6 +20,7 @@ export default function HanziArchitect() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState<CharacterData[]>([]);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
 
   // Load both Session and History on Mount
   useEffect(() => {
@@ -150,7 +152,9 @@ export default function HanziArchitect() {
         }}
       />
 
-      <main className="relative z-10 max-w-6xl mx-auto px-6 py-12">
+      <main
+        className={`relative z-10 max-w-6xl mx-auto px-6 py-12 ${isAdminOpen ? 'blur-sm transition-all' : ''}`}
+      >
         {/* Header Section */}
         <header className="text-center mb-12">
           <h1 className="text-4xl font-bold tracking-widest text-cyan-400 uppercase mb-2">
@@ -267,6 +271,36 @@ export default function HanziArchitect() {
           </div>
         )}
       </main>
+      {/* Admin Toggle Button */}
+      <button
+        onClick={() => setIsAdminOpen(!isAdminOpen)}
+        className="fixed bottom-6 right-6 z-[60] p-3 bg-[#161f27] border border-cyan-500/30 rounded-full text-cyan-400 shadow-lg hover:bg-cyan-500/20 transition-all active:scale-90"
+        title="Database Maintenance"
+      >
+        {isAdminOpen ? '✕' : '⚙️'}
+      </button>
+
+      {/* Admin Modal */}
+      {isAdminOpen && (
+        <div className="fixed inset-0 z-[50] flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            onClick={() => setIsAdminOpen(false)}
+          />
+
+          {/* Panel Container */}
+          <div className="relative bg-[#0f1419] border border-cyan-500/40 p-8 rounded-xl max-w-md w-full shadow-[0_0_50px_rgba(6,182,212,0.2)] animate-in zoom-in-95 duration-200">
+            <h3 className="text-cyan-400 font-bold mb-6 tracking-widest uppercase border-b border-cyan-500/20 pb-2">
+              System Maintenance
+            </h3>
+            <AdminPanel />
+            <p className="text-[9px] text-cyan-500/40 mt-6 text-center italic">
+              Caution: Modifications to SQLite store are immediate.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
