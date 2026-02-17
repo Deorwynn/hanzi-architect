@@ -53,7 +53,10 @@ works entirely offline, bypassing the latency of traditional web APIs.
 - [x] SQLite schema designed and 9,500+ records seeded.
 - [x] HSK 3.0 Integration & Database Migration (HAN-11).
 - [x] Cyber-Architect UI Polish & HSK Visual Feedback (HAN-22).
-- [ ] **Next:** Radical Discovery System (Explorer view).
+- [x] Copy-to-clipboard feature for cards (HAN-14).
+- [x] Unified accessible color logic for characters and cards (HAN-42).
+- [ ] **Next:** Random Character Discovery Search (HAN-12).
+- [ ] Radical Discovery System (Explorer view).
 - [ ] Stroke order animation and SVG-based decomposition.
 
 ## 🏮 Data Sources
