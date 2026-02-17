@@ -1,5 +1,6 @@
 'use client';
 import { useClipboard } from '../../hooks/useClipboard';
+import { getHskStyle } from '@/utils/hskStyles';
 
 interface CharacterHeroProps {
   character: string;
@@ -14,53 +15,29 @@ export default function CharacterHero({
 }: CharacterHeroProps) {
   const { copied, copy } = useClipboard();
 
-  const getGlowStyles = () => {
-    if (!hskLevel)
-      return {
-        color: 'rgba(6, 182, 212, 0.6)',
-        classes:
-          'border-cyan-500/30 text-cyan-200/60 drop-shadow-[0_0_15px_rgba(6,182,212,0.2)]',
-      };
-    if (hskLevel <= 3)
-      return {
-        color: 'rgba(34, 211, 238, 0.5)',
-        classes:
-          'border-cyan-400/50 shadow-[0_0_30px_rgba(34,211,238,0.25)] text-cyan-300',
-      };
-    if (hskLevel <= 6)
-      return {
-        color: 'rgba(52, 211, 153, 0.5)',
-        classes:
-          'border-emerald-400/50 shadow-[0_0_30px_rgba(52,211,153,0.25)] text-emerald-300',
-      };
-    return {
-      color: 'rgba(249, 115, 22, 0.6)',
-      classes:
-        'border-orange-500/60 shadow-[0_0_40px_rgba(249,115,22,0.4)] text-orange-300',
-    };
-  };
-
-  const glow = getGlowStyles();
+  const hskStyle = getHskStyle(hskLevel);
 
   return (
     <button
       onClick={() => copy(character)}
-      aria-label={
-        copied
-          ? `${character} copied to clipboard`
-          : `Copy character: ${character}`
-      }
-      style={{ '--focus-glow': glow.color } as React.CSSProperties}
+      style={{ '--focus-glow': hskStyle.glow } as React.CSSProperties}
       className={`
-        group relative flex items-center justify-center w-full aspect-square 
-        bg-[#161f27] border-2 rounded-2xl overflow-hidden transition-all duration-500 
-        outline-none cursor-pointer
-        ${glow.classes} border-opacity-20
-        hover:border-opacity-100
-        focus-visible:border-opacity-100 
-        focus-visible:shadow-[0_0_40px_var(--focus-glow)]
-      `}
+      group relative flex items-center justify-center w-full aspect-square 
+      bg-[#161f27] border-2 rounded-2xl overflow-hidden transition-all duration-500 
+      outline-none cursor-pointer
+      ${hskStyle.textClass} ${hskStyle.borderClass}
+      ${hskStyle.isRaw ? 'animate-flicker hover:border-slate-300/60' : 'hover:border-current/60'}
+      focus-visible:shadow-[0_0_40px_var(--focus-glow)]
+      focus-visible:border-current/100
+    `}
     >
+      {/* HARDWARE HUM: Using white at very low opacity for a neutral 'glow' */}
+      {hskLevel && (
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none z-0 bg-white opacity-[0.01] animate-hsk-hum"
+        />
+      )}
       {/* DECORATIVE: Scanlines & Beam (Hidden from SR) */}
       <div
         aria-hidden="true"
@@ -76,7 +53,7 @@ export default function CharacterHero({
         aria-hidden="true"
         className="absolute top-3 left-8 text-[10px] font-mono text-cyan-500/50 tracking-[0.2em] uppercase z-30 group-focus-visible:text-cyan-400 transition-colors"
       >
-        Result: {hskLevel ? 'Index_Match' : 'Unclassified_Entry'}
+        Result: {hskStyle.label}
       </div>
       <div
         aria-hidden="true"

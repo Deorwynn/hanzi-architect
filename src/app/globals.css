@@ -42,6 +42,18 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-delay: -1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0s !important;
+    background-attachment: initial !important;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -50,7 +62,7 @@ body {
 
 .bg-scanline {
   background:
-    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 50%),
     linear-gradient(
       90deg,
       rgba(255, 0, 0, 0.06),
@@ -61,6 +73,7 @@ body {
     100% 4px,
     3px 100%;
 }
+
 @keyframes scanline-move {
   0% {
     transform: translateY(-172px);
@@ -68,31 +81,6 @@ body {
   100% {
     transform: translateY(150px);
   }
-}
-
-@keyframes old-screen-flicker {
-  0% {
-    opacity: 0.12;
-  }
-  20% {
-    opacity: 0.15;
-  }
-  40% {
-    opacity: 0.1;
-  }
-  60% {
-    opacity: 0.18;
-  }
-  80% {
-    opacity: 0.14;
-  }
-  100% {
-    opacity: 0.12;
-  }
-}
-
-.animate-scan {
-  animation: scanline-move 7s linear infinite;
 }
 
 .bg-scanline-pulse {
@@ -106,6 +94,24 @@ body {
   width: 130%;
   left: -15%;
   filter: blur(2px);
+}
+
+.animate-scan {
+  animation: scanline-move 7s linear infinite;
+}
+
+@keyframes hsk-soft-flicker {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.007;
+  }
+}
+
+.animate-hsk-hum {
+  animation: hsk-soft-flicker 0.2s ease-in-out infinite;
 }
 
 @keyframes chip-flicker {
