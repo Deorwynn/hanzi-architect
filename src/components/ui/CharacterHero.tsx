@@ -22,9 +22,10 @@ export default function CharacterHero({
       onClick={() => copy(character)}
       style={{ '--focus-glow': hskStyle.glow } as React.CSSProperties}
       className={`
-      group relative flex items-center justify-center w-full aspect-square 
-      bg-[#161f27] border-2 rounded-2xl overflow-hidden transition-all duration-500 
-      outline-none cursor-pointer
+      group relative flex items-center justify-center 
+      w-full max-w-[292px] mx-auto aspect-square 
+      bg-[#161f27] border-2 rounded-2xl overflow-hidden 
+      transition-all duration-500 outline-none cursor-pointer
       ${hskStyle.textClass} ${hskStyle.borderClass}
       ${hskStyle.isRaw ? 'animate-flicker hover:border-slate-300/60' : 'hover:border-current/60'}
       focus-visible:shadow-[0_0_40px_var(--focus-glow)]
