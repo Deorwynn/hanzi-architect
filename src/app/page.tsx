@@ -2,11 +2,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { CharacterData } from '../types/database';
+import { getHskStyle } from '../utils/hskStyles';
 import MetadataCard from '../components/ui/MetadataCard';
 import CharacterHero from '../components/ui/CharacterHero';
 import HistoryBar from '../components/ui/HistoryBar';
 import DecompositionGrid from '../components/ui/DecompositionGrid';
 import AdminPanel from '@/components/AdminPanel';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { useRandomCharacter } from '../hooks/useRandomCharacter';
 
 export default function HanziArchitect() {
@@ -178,7 +180,51 @@ export default function HanziArchitect() {
 
         {/* Results Section */}
         {characterData && (
-          <section className="mt-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <section
+            className={`
+              mt-8 animate-in fade-in slide-in-from-bottom-4 duration-700
+              transition-opacity duration-300 
+              ${loading ? 'opacity-50 pointer-events-none' : 'opacity-100'}
+            `}
+          >
+            {/* BADGE ROW*/}
+            <div className="flex flex-wrap justify-center items-center gap-3 mb-8">
+              <StatusBadge
+                label="HSK"
+                value={characterData.hsk_level ?? 'N/A'}
+                className={getHskStyle(characterData.hsk_level).badgeClass}
+              />
+
+              <StatusBadge
+                label="字体"
+                value={
+                  characterData.script_type === 'S'
+                    ? 'Simplified'
+                    : characterData.script_type === 'T'
+                      ? 'Traditional'
+                      : 'Universal'
+                }
+                className="bg-blue-500/10 text-blue-400 border-blue-500/30"
+              />
+
+              {characterData.variants && (
+                <button
+                  onClick={() => performSearch(characterData.variants!)}
+                  className="hover:scale-105 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-purple-500/40 rounded"
+                  title={`Search variant: ${characterData.variants}`}
+                >
+                  <StatusBadge
+                    label={
+                      characterData.script_type === 'S'
+                        ? 'Traditional Form'
+                        : 'Simplified Form'
+                    }
+                    value={characterData.variants}
+                    className="bg-purple-500/10 text-purple-400 border-purple-500/30 cursor-pointer hover:bg-purple-500/20"
+                  />
+                </button>
+              )}
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-[292px_1fr] gap-8 mb-12 items-start">
               <div className="w-full lg:mx-0">
                 <CharacterHero
@@ -189,20 +235,7 @@ export default function HanziArchitect() {
               </div>
 
               <div className="w-full">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <MetadataCard
-                    label="HSK Level"
-                    value={
-                      characterData.hsk_level
-                        ? `HSK ${characterData.hsk_level}`
-                        : 'N/A'
-                    }
-                    icon={
-                      <span className="text-[10px] opacity-50 text-orange-400">
-                        HSK 3.0
-                      </span>
-                    }
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <MetadataCard
                     label="Pinyin"
                     value={characterData.pinyin}
@@ -215,7 +248,7 @@ export default function HanziArchitect() {
                     value={characterData.radical}
                     icon={<span className="text-[10px] opacity-50">部首</span>}
                   />
-                  <div className="col-span-1 sm:col-span-3">
+                  <div className="col-span-1 sm:col-span-2">
                     <MetadataCard
                       label="Definition"
                       value={characterData.definition}
