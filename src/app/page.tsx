@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { CharacterData } from '../types/database';
 import MetadataCard from '../components/ui/MetadataCard';
@@ -7,11 +7,8 @@ import CharacterHero from '../components/ui/CharacterHero';
 import HistoryBar from '../components/ui/HistoryBar';
 import DecompositionGrid from '../components/ui/DecompositionGrid';
 import AdminPanel from '@/components/AdminPanel';
+import { useRandomCharacter } from '../hooks/useRandomCharacter';
 
-/**
- * Main application dashboard for Hánzì Architect.
- * Handles the orchestration of user input, Rust IPC calls, and character state management.
- */
 export default function HanziArchitect() {
   const [searchQuery, setSearchQuery] = useState('');
   const [characterData, setCharacterData] = useState<CharacterData | null>(
@@ -22,122 +19,88 @@ export default function HanziArchitect() {
   const [history, setHistory] = useState<CharacterData[]>([]);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
 
-  // Load both Session and History on Mount
-  useEffect(() => {
-    // Restore Last Session
-    const savedLast = localStorage.getItem('hanzi_last_session');
-    if (savedLast) {
-      try {
-        setCharacterData(JSON.parse(savedLast));
-      } catch (err) {
-        console.error('Session restore failed', err);
-      }
-    }
+  /**
+   * CENTRALIZED FETCH LOGIC
+   */
+  const performSearch = useCallback(async (target: string) => {
+    if (!target.trim()) return;
 
-    // Restore History List
-    const savedHistory = localStorage.getItem('hanzi_history');
-    if (savedHistory) {
-      try {
-        setHistory(JSON.parse(savedHistory));
-      } catch (err) {
-        console.error('History restore failed', err);
-      }
+    setLoading(true);
+    setError('');
+
+    try {
+      const result = await invoke<CharacterData>('get_character_details', {
+        target: target.trim(),
+      });
+
+      setCharacterData(result);
+
+      // Update History List
+      setHistory((prev) => {
+        const filtered = prev.filter(
+          (item) => item.character !== result.character,
+        );
+        return [result, ...filtered].slice(0, 10);
+      });
+
+      // Save to last session
+      localStorage.setItem('hanzi_last_session', JSON.stringify(result));
+      setSearchQuery('');
+    } catch (err) {
+      console.error('Search Error:', err);
+      setError(`Character "${target}" not found in records.`);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
-  /**
-   * Logical Handler for selecting from History.
-   * Re-fetches from SQLite to ensure data is "hydrated" and fresh.
-   */
-  const handleSelectHistory = async (item: CharacterData) => {
-    setLoading(true);
-    try {
-      const freshData = await invoke<CharacterData>('get_character_details', {
-        target: item.character,
-      });
+  // Initialize Random Hook
+  const { triggerShuffle, isShuffling } = useRandomCharacter((char) => {
+    performSearch(char);
+  });
 
-      setCharacterData(freshData);
-
-      updateHistory(freshData);
-    } catch (err) {
-      console.error('Failed to hydrate history item:', err);
-
-      setCharacterData(item);
-      updateHistory(item);
-    } finally {
-      setLoading(false);
+  // Sync History to LocalStorage whenever it changes
+  useEffect(() => {
+    if (history.length > 0) {
+      localStorage.setItem('hanzi_history', JSON.stringify(history));
     }
+  }, [history]);
+
+  // Load Session and History on Mount
+  useEffect(() => {
+    const savedLast = localStorage.getItem('hanzi_last_session');
+    if (savedLast) setCharacterData(JSON.parse(savedLast));
+
+    const savedHistory = localStorage.getItem('hanzi_history');
+    if (savedHistory) setHistory(JSON.parse(savedHistory));
+  }, []);
+
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.key.toLowerCase() === 'r' &&
+        document.activeElement?.tagName !== 'INPUT'
+      ) {
+        triggerShuffle();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [triggerShuffle]);
+
+  // Handlers
+  const handleSelectHistory = (item: CharacterData) =>
+    performSearch(item.character);
+  const handleComponentClick = (char: string) => performSearch(char);
+  const handleFormSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    performSearch(searchQuery);
   };
 
-  /**
-   * Centralized History Management
-   */
-  const updateHistory = (newEntry: CharacterData) => {
-    setHistory((prev) => {
-      const filtered = prev.filter(
-        (item) => item.character !== newEntry.character,
-      );
-      const updated = [newEntry, ...filtered].slice(0, 10);
-      localStorage.setItem('hanzi_history', JSON.stringify(updated));
-      return updated;
-    });
-    localStorage.setItem('hanzi_last_session', JSON.stringify(newEntry));
-  };
-
-  /**
-   * Clear Utility
-   */
   const clearHistory = () => {
     localStorage.removeItem('hanzi_history');
     setHistory([]);
-  };
-
-  const handleSearch = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!searchQuery.trim()) return;
-
-    setLoading(true);
-    setError('');
-
-    try {
-      // Invoke the Rust command 'get_character_details'
-      const result = await invoke<CharacterData>('get_character_details', {
-        target: searchQuery.trim(),
-      });
-
-      setCharacterData(result);
-      updateHistory(result);
-      setSearchQuery('');
-    } catch (err) {
-      console.error('IPC Error:', err);
-      setError(`Character "${searchQuery}" not found in local records.`);
-      setCharacterData(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /**
-   * Drill-down handler: When a component in the grid is clicked,
-   * we treat it as a new search.
-   */
-  const handleComponentClick = async (char: string) => {
-    setSearchQuery(char);
-    setLoading(true);
-    setError('');
-    try {
-      const result = await invoke<CharacterData>('get_character_details', {
-        target: char,
-      });
-      setCharacterData(result);
-      updateHistory(result);
-      setSearchQuery('');
-    } catch (err) {
-      console.error('Drill-down failed:', err);
-      setError(`Character "${char}" not found.`);
-    } finally {
-      setLoading(false);
-    }
   };
 
   return (
@@ -146,8 +109,7 @@ export default function HanziArchitect() {
       <div
         className="fixed inset-0 opacity-[0.03] pointer-events-none"
         style={{
-          backgroundImage: `linear-gradient(0deg, transparent 24%, rgba(6, 182, 212, .5) 25%, rgba(6, 182, 212, .5) 26%, transparent 27%, transparent 74%, rgba(6, 182, 212, .5) 75%, rgba(6, 182, 212, .5) 76%, transparent 77%, transparent),
-          linear-gradient(90deg, transparent 24%, rgba(6, 182, 212, .5) 25%, rgba(6, 182, 212, .5) 26%, transparent 27%, transparent 74%, rgba(6, 182, 212, .5) 75%, rgba(6, 182, 212, .5) 76%, transparent 77%, transparent)`,
+          backgroundImage: `linear-gradient(0deg, transparent 24%, rgba(6, 182, 212, .5) 25%, rgba(6, 182, 212, .5) 26%, transparent 27%, transparent 74%, rgba(6, 182, 212, .5) 75%, rgba(6, 182, 212, .5) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(6, 182, 212, .5) 25%, rgba(6, 182, 212, .5) 26%, transparent 27%, transparent 74%, rgba(6, 182, 212, .5) 75%, rgba(6, 182, 212, .5) 76%, transparent 77%, transparent)`,
           backgroundSize: '50px 50px',
         }}
       />
@@ -167,10 +129,14 @@ export default function HanziArchitect() {
 
         {/* Search Bar Area */}
         <div className="mb-8">
-          <form onSubmit={handleSearch} className="relative group">
+          <form onSubmit={handleFormSearch} className="relative group">
             <div className="absolute -inset-1 bg-cyan-500/20 rounded-lg blur opacity-25 group-focus-within:opacity-100 transition duration-500"></div>
             <div className="relative flex items-center bg-[#161f27] border border-cyan-500/30 rounded-lg overflow-hidden">
+              <label htmlFor="char-search" className="sr-only">
+                Search characters
+              </label>
               <input
+                id="char-search"
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -185,11 +151,24 @@ export default function HanziArchitect() {
               </button>
             </div>
           </form>
+
           {error && (
             <p className="mt-4 text-red-400 text-sm text-center font-mono italic">
               {error}
             </p>
           )}
+
+          <div className="mt-4 flex justify-center">
+            <button
+              onClick={triggerShuffle}
+              disabled={isShuffling}
+              aria-label="Randomize character"
+              className={`flex items-center gap-2 px-4 py-2 rounded border border-cyan-500/30 text-xs tracking-[0.2em] uppercase transition-all ${isShuffling ? 'opacity-50 cursor-wait' : 'hover:bg-cyan-500/10 hover:border-cyan-500/60'} text-cyan-400`}
+            >
+              {isShuffling ? '⟳ Syncing...' : '🎲 Random Character'}
+            </button>
+          </div>
+
           <HistoryBar
             history={history}
             onSelect={handleSelectHistory}
@@ -237,7 +216,6 @@ export default function HanziArchitect() {
                     icon={<span className="text-[10px] opacity-50">部首</span>}
                   />
                   <div className="col-span-1 sm:col-span-3">
-                    {' '}
                     <MetadataCard
                       label="Definition"
                       value={characterData.definition}

@@ -263,6 +263,40 @@ async fn sync_json_metadata(handle: tauri::AppHandle) -> Result<String, String> 
 }
 
 #[tauri::command]
+async fn get_random_character(handle: tauri::AppHandle) -> Result<CharacterData, String> {
+    let db_path = get_db_path(&handle)?;
+    let conn = Connection::open_with_flags(&db_path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
+        .map_err(|e| e.to_string())?;
+    
+    // SQLite uses RANDOM() to pick a row
+    let mut stmt = conn.prepare(
+        "SELECT id, character, definition, pinyin, radical, hsk_level, is_radical, 
+                script_type, stroke_count, decomposition, variants, radical_variants 
+         FROM characters ORDER BY RANDOM() LIMIT 1"
+    ).map_err(|e| e.to_string())?;
+    
+    let char_data = stmt.query_row([], |row| {
+        Ok(CharacterData {
+            id: row.get(0)?,
+            character: row.get(1)?,
+            definition: row.get(2)?,
+            pinyin: row.get(3)?,
+            radical: row.get(4)?,
+            hsk_level: row.get(5)?,
+            is_radical: row.get(6)?,
+            script_type: row.get(7)?,
+            stroke_count: row.get(8)?,
+            decomposition: row.get(9)?,
+            variants: row.get(10)?,
+            radical_variants: row.get(11)?,
+            etymology: row.get(12).ok()
+        })
+    }).map_err(|e| e.to_string())?;
+
+    Ok(char_data)
+}
+
+#[tauri::command]
 async fn backup_database(handle: tauri::AppHandle) -> Result<String, String> {
     let db_path = get_db_path(&handle)?;
     let mut backup_path = db_path.clone();
@@ -304,7 +338,8 @@ pub fn run() {
             sync_hsk_levels,
             backup_database,
             import_dictionary_data,
-            sync_json_metadata
+            sync_json_metadata,
+            get_random_character
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
