@@ -3,6 +3,7 @@ export interface HskStyleConfig {
   charColor: string;
   borderClass: string;
   textClass: string;
+  badgeClass: string;
   label: string;
   isRaw?: boolean;
 }
@@ -17,6 +18,7 @@ export const getHskStyle = (
       charColor: 'rgba(226, 232, 240, 0.9)',
       borderClass: 'border-slate-500/30',
       textClass: 'text-slate-200',
+      badgeClass: 'bg-slate-500/10 text-slate-400 border-slate-500/30',
       label: 'RAW_DATA_STREAM',
       isRaw: true,
     };
@@ -29,6 +31,7 @@ export const getHskStyle = (
       charColor: 'rgb(34, 211, 238)',
       borderClass: 'border-cyan-500/20',
       textClass: 'text-cyan-300',
+      badgeClass: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
       label: 'CORE_ENTRY',
     };
   }
@@ -40,6 +43,7 @@ export const getHskStyle = (
       charColor: 'rgb(249, 115, 22)',
       borderClass: 'border-orange-500/30',
       textClass: 'text-orange-400',
+      badgeClass: 'bg-orange-500/10 text-orange-400 border-orange-500/30',
       label: 'ADVANCED_ENTRY',
     };
   }
@@ -50,6 +54,7 @@ export const getHskStyle = (
     charColor: 'rgb(167, 139, 250)',
     borderClass: 'border-violet-500/30',
     textClass: 'text-violet-300',
+    badgeClass: 'bg-violet-500/10 text-violet-400 border-violet-500/30',
     label: 'ELITE_ARCHIVE',
   };
 };
