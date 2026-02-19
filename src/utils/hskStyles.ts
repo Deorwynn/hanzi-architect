@@ -31,7 +31,7 @@ export const getHskStyle = (
       charColor: 'rgb(34, 211, 238)',
       borderClass: 'border-cyan-500/20',
       textClass: 'text-cyan-300',
-      badgeClass: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
+      badgeClass: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/50',
       label: 'CORE_ENTRY',
     };
   }
@@ -43,7 +43,7 @@ export const getHskStyle = (
       charColor: 'rgb(249, 115, 22)',
       borderClass: 'border-orange-500/30',
       textClass: 'text-orange-400',
-      badgeClass: 'bg-orange-500/10 text-orange-400 border-orange-500/30',
+      badgeClass: 'bg-orange-500/10 text-orange-400 border-orange-500/50',
       label: 'ADVANCED_ENTRY',
     };
   }
@@ -54,7 +54,7 @@ export const getHskStyle = (
     charColor: 'rgb(167, 139, 250)',
     borderClass: 'border-violet-500/30',
     textClass: 'text-violet-300',
-    badgeClass: 'bg-violet-500/10 text-violet-400 border-violet-500/30',
+    badgeClass: 'bg-violet-500/10 text-violet-400 border-violet-500/50',
     label: 'ELITE_ARCHIVE',
   };
 };

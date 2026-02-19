@@ -80,11 +80,14 @@ export default function HanziArchitect() {
   // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (
-        e.key.toLowerCase() === 'r' &&
-        document.activeElement?.tagName !== 'INPUT'
-      ) {
+      if (document.activeElement?.tagName === 'INPUT') return;
+
+      const key = e.key.toLowerCase();
+
+      if (key === 'r') {
         triggerShuffle();
+      } else if (key === 'v' && characterData?.variants) {
+        performSearch(characterData.variants);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -207,20 +210,30 @@ export default function HanziArchitect() {
                 className="bg-blue-500/10 text-blue-400 border-blue-500/30"
               />
 
+              {/* VARIANT TOGGLE BADGE */}
               {characterData.variants && (
                 <button
                   onClick={() => performSearch(characterData.variants!)}
-                  className="hover:scale-105 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-purple-500/40 rounded"
-                  title={`Search variant: ${characterData.variants}`}
+                  className="hover:scale-105 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-lime-500/40 rounded group"
+                  aria-label={`Switch to ${characterData.script_type === 'S' ? 'Traditional' : 'Simplified'} form: ${characterData.variants} (Hotkey: V)`}
+                  title={`Toggle Variant: ${characterData.variants}`}
                 >
                   <StatusBadge
                     label={
-                      characterData.script_type === 'S'
-                        ? 'Traditional Form'
-                        : 'Simplified Form'
+                      <span className="flex items-center gap-1.5">
+                        <span
+                          className="opacity-50 text-[12px] group-hover:opacity-100 transition-opacity"
+                          aria-hidden="true"
+                        >
+                          ⇄
+                        </span>
+                        {characterData.script_type === 'S'
+                          ? 'Traditional Form'
+                          : 'Simplified Form'}
+                      </span>
                     }
                     value={characterData.variants}
-                    className="bg-purple-500/10 text-purple-400 border-purple-500/30 cursor-pointer hover:bg-purple-500/20"
+                    className="bg-lime-500/10 text-lime-400 border-lime-500/30 cursor-pointer hover:bg-lime-500/20 shadow-[0_0_15px_rgba(163,230,53,0.1)]"
                   />
                 </button>
               )}
