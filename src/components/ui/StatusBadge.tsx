@@ -1,5 +1,5 @@
 interface ArchitectBadgeProps {
-  label: string;
+  label: string | React.ReactNode;
   value?: string | number;
   className?: string;
 }

@@ -72,14 +72,6 @@ export default function AdminPanel() {
         >
           3. Rebuild_Structures
         </button>
-
-        <button
-          onClick={() => runCommand('sync_json_metadata', 'SYNC_METADATA')}
-          disabled={loading}
-          className="w-full py-2 text-[10px] uppercase bg-amber-950/20 border border-amber-500/50 text-amber-400 hover:bg-amber-500 hover:text-white transition-all"
-        >
-          4. Sync_JSON_Metadata
-        </button>
       </div>
     </div>
   );
