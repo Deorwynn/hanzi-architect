@@ -235,6 +235,49 @@ async fn get_random_character(handle: tauri::AppHandle) -> Result<CharacterData,
 }
 
 #[tauri::command]
+async fn get_related_characters(handle: AppHandle, radical: String, current_char: String) -> Result<Vec<CharacterData>, String> {
+    let db_path = get_db_path(&handle)?;
+    let conn = Connection::open_with_flags(&db_path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
+        .map_err(|e| e.to_string())?;
+
+    let mut stmt = conn.prepare(
+        "SELECT id, character, definition, pinyin, radical, hsk_level, is_radical, script_type, stroke_count, decomposition, variants, radical_variants, etymology
+         FROM characters 
+         WHERE (radical = ?1 OR radical_variants LIKE ?2) 
+         AND character != ?3
+         ORDER BY hsk_level ASC, stroke_count ASC
+         LIMIT 16"
+    ).map_err(|e| e.to_string())?;
+
+    let radical_pattern = format!("%{}%", radical);
+
+    let rows = stmt.query_map([radical, radical_pattern, current_char], |row| {
+        Ok(CharacterData {
+            id: row.get(0)?,
+            character: row.get(1)?,
+            definition: row.get(2).unwrap_or_default(),
+            pinyin: row.get(3).unwrap_or_default(),
+            radical: row.get(4).unwrap_or_default(),
+            hsk_level: row.get(5).ok(),
+            is_radical: row.get(6).unwrap_or(false),
+            script_type: row.get(7).ok(),
+            stroke_count: row.get(8).ok(),
+            decomposition: row.get(9).ok(),
+            variants: row.get(10).ok(),
+            radical_variants: row.get(11).ok(),
+            etymology: row.get(12).ok(),
+        })
+    }).map_err(|e| e.to_string())?;
+
+    let mut results = Vec::new();
+    for row in rows {
+        results.push(row.map_err(|e| e.to_string())?);
+    }
+    
+    Ok(results)
+}
+
+#[tauri::command]
 async fn backup_database(handle: tauri::AppHandle) -> Result<String, String> {
     let db_path = get_db_path(&handle)?;
     let mut backup_path = db_path.clone();
@@ -262,7 +305,8 @@ pub fn run() {
             sync_hsk_levels,
             backup_database,
             import_dictionary_data,
-            get_random_character
+            get_random_character,
+            get_related_characters
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
