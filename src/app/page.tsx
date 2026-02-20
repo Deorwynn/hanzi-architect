@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { CharacterData } from '../types/database';
 import { getHskStyle } from '../utils/hskStyles';
-import MetadataCard from '../components/ui/MetadataCard';
+import InfoCard from '@/components/ui/InfoCard';
 import CharacterHero from '../components/ui/CharacterHero';
 import HistoryBar from '../components/ui/HistoryBar';
 import DecompositionGrid from '../components/ui/DecompositionGrid';
@@ -36,20 +36,19 @@ export default function HanziArchitect() {
       });
 
       setCharacterData(result);
+      localStorage.setItem('hanzi_last_session', JSON.stringify(result));
 
-      // Update History List
       setHistory((prev) => {
         const filtered = prev.filter(
           (item) => item.character !== result.character,
         );
-        return [result, ...filtered].slice(0, 10);
+        const newHistory = [result, ...filtered].slice(0, 10);
+        localStorage.setItem('hanzi_history', JSON.stringify(newHistory));
+        return newHistory;
       });
 
-      // Save to last session
-      localStorage.setItem('hanzi_last_session', JSON.stringify(result));
       setSearchQuery('');
     } catch (err) {
-      console.error('Search Error:', err);
       setError(`Character "${target}" not found in records.`);
     } finally {
       setLoading(false);
@@ -61,52 +60,55 @@ export default function HanziArchitect() {
     performSearch(char);
   });
 
-  // Sync History to LocalStorage whenever it changes
-  useEffect(() => {
-    if (history.length > 0) {
-      localStorage.setItem('hanzi_history', JSON.stringify(history));
-    }
-  }, [history]);
-
   // Load Session and History on Mount
   useEffect(() => {
-    const savedLast = localStorage.getItem('hanzi_last_session');
-    if (savedLast) setCharacterData(JSON.parse(savedLast));
-
     const savedHistory = localStorage.getItem('hanzi_history');
-    if (savedHistory) setHistory(JSON.parse(savedHistory));
+    const savedLast = localStorage.getItem('hanzi_last_session');
+
+    if (savedHistory) {
+      try {
+        setHistory(JSON.parse(savedHistory));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    if (savedLast) {
+      try {
+        setCharacterData(JSON.parse(savedLast));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, []);
+
+  const clearHistory = useCallback(() => {
+    setHistory([]);
+    setCharacterData(null);
+    localStorage.removeItem('hanzi_history');
+    localStorage.removeItem('hanzi_last_session');
   }, []);
 
   // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (document.activeElement?.tagName === 'INPUT') return;
-
       const key = e.key.toLowerCase();
 
-      if (key === 'r') {
-        triggerShuffle();
-      } else if (key === 'v' && characterData?.variants) {
+      if (key === 'r') triggerShuffle();
+      if (key === 'v' && characterData?.variants) {
         performSearch(characterData.variants);
       }
+
+      if (key === 'escape') clearHistory();
     };
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [triggerShuffle]);
+  }, [triggerShuffle, characterData, performSearch, clearHistory]);
 
   // Handlers
-  const handleSelectHistory = (item: CharacterData) =>
-    performSearch(item.character);
   const handleComponentClick = (char: string) => performSearch(char);
-  const handleFormSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    performSearch(searchQuery);
-  };
-
-  const clearHistory = () => {
-    localStorage.removeItem('hanzi_history');
-    setHistory([]);
-  };
 
   return (
     <div className="min-h-screen bg-[#0f1419] text-white relative overflow-hidden font-sans">
@@ -120,126 +122,92 @@ export default function HanziArchitect() {
       />
 
       <main
-        className={`relative z-10 max-w-6xl mx-auto px-6 py-12 ${isAdminOpen ? 'blur-sm transition-all' : ''}`}
+        className={`relative z-10 max-w-[1600px] mx-auto px-6 py-8 ${isAdminOpen ? 'blur-sm transition-all' : ''}`}
       >
-        {/* Header Section */}
-        <header className="text-center mb-12">
-          <h1 className="text-4xl font-bold tracking-widest text-cyan-400 uppercase mb-2">
-            Hanzi Architect
-          </h1>
-          <p className="text-xs text-cyan-500/60 tracking-[0.2em] uppercase">
-            Character Decomposition & Analysis System
-          </p>
-        </header>
+        {/* Compact Header & Search */}
+        <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-6 border-b border-cyan-500/10 pb-6">
+          <div className="text-left">
+            <h1 className="text-2xl font-bold tracking-widest text-cyan-400 uppercase">
+              Hanzi Architect
+            </h1>
+            <p className="text-[10px] text-cyan-500/40 tracking-[0.2em] uppercase">
+              Decomposition Analysis
+            </p>
+          </div>
 
-        {/* Search Bar Area */}
-        <div className="mb-8">
-          <form onSubmit={handleFormSearch} className="relative group">
-            <div className="absolute -inset-1 bg-cyan-500/20 rounded-lg blur opacity-25 group-focus-within:opacity-100 transition duration-500"></div>
-            <div className="relative flex items-center bg-[#161f27] border border-cyan-500/30 rounded-lg overflow-hidden">
-              <label htmlFor="char-search" className="sr-only">
-                Search characters
-              </label>
+          <div className="flex-1 max-w-xl w-full">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                performSearch(searchQuery);
+              }}
+              className="relative"
+            >
               <input
-                id="char-search"
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="输入汉字 / Enter a Chinese character..."
-                className="w-full bg-transparent px-6 py-4 outline-none text-cyan-100 placeholder:text-cyan-900"
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  if (error) setError('');
+                }}
+                placeholder="Search..."
+                className="w-full bg-[#161f27] border border-cyan-500/20 px-4 py-2 rounded outline-none focus:border-cyan-500/50 text-cyan-100 transition-all"
               />
               <button
                 type="submit"
-                className="px-6 py-4 bg-cyan-500/10 border-l border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20 transition-colors"
+                className="absolute right-3 top-2 opacity-50 hover:opacity-100"
               >
-                {loading ? '...' : '🔍'}
+                🔍
               </button>
-            </div>
-          </form>
-
-          {error && (
-            <p className="mt-4 text-red-400 text-sm text-center font-mono italic">
-              {error}
-            </p>
-          )}
-
-          <div className="mt-4 flex justify-center">
-            <button
-              onClick={triggerShuffle}
-              disabled={isShuffling}
-              aria-label="Randomize character"
-              className={`flex items-center gap-2 px-4 py-2 rounded border border-cyan-500/30 text-xs tracking-[0.2em] uppercase transition-all ${isShuffling ? 'opacity-50 cursor-wait' : 'hover:bg-cyan-500/10 hover:border-cyan-500/60'} text-cyan-400`}
-            >
-              {isShuffling ? '⟳ Syncing...' : '🎲 Random Character'}
-            </button>
+            </form>
           </div>
 
-          <HistoryBar
-            history={history}
-            onSelect={handleSelectHistory}
-            onClear={clearHistory}
-          />
+          <button
+            onClick={triggerShuffle}
+            disabled={isShuffling}
+            className="text-[10px] border border-cyan-500/20 px-4 py-2 rounded hover:bg-cyan-500/10 transition-all text-cyan-400 uppercase tracking-widest"
+          >
+            {isShuffling ? 'Syncing...' : '🎲 Random'}
+          </button>
         </div>
 
-        {/* Results Section */}
-        {characterData && (
-          <section
-            className={`
-              mt-8 animate-in fade-in slide-in-from-bottom-4 duration-700
-              transition-opacity duration-300 
-              ${loading ? 'opacity-50 pointer-events-none' : 'opacity-100'}
-            `}
+        {/* Error Message HUD */}
+        {error && (
+          <div className="max-w-xl mx-auto mb-6 p-3 bg-red-500/10 border border-red-500/50 rounded flex items-center gap-3">
+            <span className="text-red-500 font-mono text-xs">
+              ![CRITICAL_ERROR]
+            </span>
+            <p className="text-[10px] text-red-200 uppercase tracking-widest">
+              {error}
+            </p>
+          </div>
+        )}
+
+        <HistoryBar
+          history={history}
+          onSelect={(item) => performSearch(item.character)}
+          onClear={clearHistory}
+        />
+
+        {/* MAIN CONTENT */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-40">
+            <div className="w-12 h-12 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin mb-4" />
+            <p className="text-[10px] text-cyan-500 uppercase tracking-[0.5em] animate-pulse">
+              Analyzing_Structure...
+            </p>
+          </div>
+        ) : characterData ? (
+          <div
+            className="
+              grid mt-8 gap-8 xl:gap-12 items-start
+              grid-cols-1 
+              md:grid-cols-[0.8fr_1.2fr] 
+              lg:grid-cols-[minmax(280px,350px)_minmax(400px,1fr)_minmax(280px,350px)]"
           >
-            {/* BADGE ROW*/}
-            <div className="flex flex-wrap justify-center items-center gap-3 mb-8">
-              <StatusBadge
-                label="HSK"
-                value={characterData.hsk_level ?? 'N/A'}
-                className={getHskStyle(characterData.hsk_level).badgeClass}
-              />
-
-              <StatusBadge
-                label="字体"
-                value={
-                  characterData.script_type === 'S'
-                    ? 'Simplified'
-                    : characterData.script_type === 'T'
-                      ? 'Traditional'
-                      : 'Universal'
-                }
-                className="bg-blue-500/10 text-blue-400 border-blue-500/30"
-              />
-
-              {/* VARIANT TOGGLE BADGE */}
-              {characterData.variants && (
-                <button
-                  onClick={() => performSearch(characterData.variants!)}
-                  className="hover:scale-105 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-lime-500/40 rounded group"
-                  aria-label={`Switch to ${characterData.script_type === 'S' ? 'Traditional' : 'Simplified'} form: ${characterData.variants} (Hotkey: V)`}
-                  title={`Toggle Variant: ${characterData.variants}`}
-                >
-                  <StatusBadge
-                    label={
-                      <span className="flex items-center gap-1.5">
-                        <span
-                          className="opacity-50 text-[12px] group-hover:opacity-100 transition-opacity"
-                          aria-hidden="true"
-                        >
-                          ⇄
-                        </span>
-                        {characterData.script_type === 'S'
-                          ? 'Traditional Form'
-                          : 'Simplified Form'}
-                      </span>
-                    }
-                    value={characterData.variants}
-                    className="bg-lime-500/10 text-lime-400 border-lime-500/30 cursor-pointer hover:bg-lime-500/20 shadow-[0_0_15px_rgba(163,230,53,0.1)]"
-                  />
-                </button>
-              )}
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-[292px_1fr] gap-8 mb-12 items-start">
-              <div className="w-full lg:mx-0">
+            {/* CHARACTER HERO */}
+            <section className="flex flex-col items-center w-full min-w-0 order-1 lg:order-2">
+              <div className="w-full flex justify-center scale-90 md:scale-100 transition-transform">
                 <CharacterHero
                   character={characterData.character}
                   hskLevel={characterData.hsk_level}
@@ -247,81 +215,141 @@ export default function HanziArchitect() {
                 />
               </div>
 
-              <div className="w-full">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <MetadataCard
-                    label="Pinyin"
-                    value={characterData.pinyin}
-                    icon={
-                      <span className="text-[10px] opacity-50">PINYIN</span>
-                    }
-                  />
-                  <MetadataCard
-                    label="Radical"
-                    value={characterData.radical}
-                    icon={<span className="text-[10px] opacity-50">部首</span>}
-                  />
-                  <div className="col-span-1 sm:col-span-2">
-                    <MetadataCard
-                      label="Definition"
-                      value={characterData.definition}
-                      icon={
-                        <span className="text-[10px] opacity-50">MEANING</span>
-                      }
-                    />
-                  </div>
-                </div>
-                <DecompositionGrid
-                  decomposition={characterData.decomposition}
-                  onComponentClick={handleComponentClick}
+              <div className="flex flex-wrap justify-center gap-2 mt-6 max-w-xs mx-auto">
+                <StatusBadge
+                  label="HSK"
+                  value={characterData.hsk_level ?? 'N/A'}
+                  className={getHskStyle(characterData.hsk_level).badgeClass}
                 />
+                <StatusBadge
+                  label="字体"
+                  value={
+                    characterData.script_type === 'S'
+                      ? 'Simplified'
+                      : characterData.script_type === 'T'
+                        ? 'Traditional'
+                        : 'Universal'
+                  }
+                  className="bg-blue-500/10 text-blue-400 border-blue-500/30"
+                />
+                {characterData.variants && (
+                  <button
+                    onClick={() => performSearch(characterData.variants!)}
+                    className="group outline-none"
+                  >
+                    <StatusBadge
+                      label={
+                        <span className="flex items-center gap-1.5">
+                          <span
+                            aria-hidden="true"
+                            className="opacity-50 group-hover:opacity-100 transition-opacity"
+                          >
+                            ⇄
+                          </span>
+                          {characterData.script_type === 'S'
+                            ? 'Traditional'
+                            : 'Simplified'}
+                        </span>
+                      }
+                      value={characterData.variants}
+                      className="bg-lime-500/10 text-lime-400 border-lime-500/30 hover:bg-lime-500/20 shadow-[0_0_10px_rgba(163,230,53,0.1)]"
+                    />
+                  </button>
+                )}
               </div>
-            </div>
+            </section>
 
-            <div className="w-full flex justify-center pt-8">
-              <p className="text-[10px] text-cyan-500/20 uppercase tracking-[0.3em]">
-                ARCHITECT ID: {characterData.id.toString().padStart(4, '0')}
-              </p>
-            </div>
-          </section>
-        )}
+            {/* TECHNICAL INFO */}
+            <section className="order-2 lg:order-3 w-full">
+              <div className="flex flex-col sm:flex-row lg:flex-col gap-6 items-start">
+                {/* Info Card - Left Side on Tablet */}
+                <InfoCard
+                  pinyin={characterData.pinyin}
+                  radical={characterData.radical}
+                  definition={characterData.definition}
+                />
 
-        {/* Placeholder (Visible only if no data) */}
-        {!characterData && !loading && (
-          <div className="text-center py-20 border border-dashed border-cyan-500/10 rounded-2xl">
-            <h2 className="text-xl font-light text-cyan-100/30 italic">
-              System Idle. Awaiting character input...
+                {/* DECOMPOSITION GRID */}
+                <div className="w-full sm:w-auto lg:w-full">
+                  <DecompositionGrid
+                    decomposition={characterData.decomposition}
+                    onComponentClick={handleComponentClick}
+                  />
+                </div>
+              </div>
+            </section>
+
+            {/* RELATED CHARACTERS */}
+            <aside
+              className="
+                bg-[#161f27]/30 border border-cyan-500/10 rounded-lg p-5 
+                order-3 lg:order-1 
+                md:col-span-2 lg:col-span-1 
+                lg:sticky lg:top-8"
+            >
+              <div className="flex items-center justify-between mb-4 border-b border-cyan-500/10 pb-2">
+                <span className="text-[10px] uppercase font-bold text-cyan-400">
+                  Related Characters
+                </span>
+                <div className="flex gap-2">
+                  <span className="text-[9px] bg-cyan-500/10 px-2 py-0.5 rounded text-cyan-500 font-mono uppercase">
+                    Radical
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-6 md:grid-cols-10 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {[...Array(16)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="aspect-square border border-cyan-500/10 bg-cyan-500/[0.02] hover:border-cyan-500/40 hover:bg-cyan-500/5 flex items-center justify-center text-cyan-200/20 cursor-pointer transition-all text-lg font-light max-h-[80px]"
+                  >
+                    ?
+                  </div>
+                ))}
+              </div>
+
+              <button className="w-full mt-4 pt-3 border-t border-cyan-500/5 text-left group">
+                <span className="text-[10px] text-cyan-500/40 group-hover:text-cyan-400 transition-colors flex items-center justify-between uppercase tracking-wider">
+                  View all HSK (3.0) {characterData.hsk_level ?? '1'} characters
+                  <span className="opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-4px] group-hover:translate-x-0">
+                    →
+                  </span>
+                </span>
+              </button>
+            </aside>
+          </div>
+        ) : (
+          <div className="bg-[#161f27]/30 text-center py-40 border border-dashed border-cyan-500/10 rounded-2xl mt-10 px-8 md:px-20">
+            <h2 className="text-l md:text-xl font-light text-cyan-200/30 italic tracking-widest uppercase">
+              System Standby...
             </h2>
+            <p className="text-[9px] text-cyan-500/30 mt-2 tracking-[0.3em]">
+              SEARCH FOR A CHARACTER TO BEGIN ANALYSIS
+            </p>
           </div>
         )}
       </main>
-      {/* Admin Toggle Button */}
+
+      {/* Admin Maintenance UI */}
       <button
         onClick={() => setIsAdminOpen(!isAdminOpen)}
-        className="fixed bottom-6 right-6 z-[60] p-3 bg-[#161f27] border border-cyan-500/30 rounded-full text-cyan-400 shadow-lg hover:bg-cyan-500/20 transition-all active:scale-90"
-        title="Database Maintenance"
+        className="fixed bottom-6 right-6 z-[60] p-3 bg-[#161f27] border border-cyan-500/30 rounded-full text-cyan-400 shadow-lg hover:bg-cyan-500/20 transition-all"
       >
         {isAdminOpen ? '✕' : '⚙️'}
       </button>
 
-      {/* Admin Modal */}
       {isAdminOpen && (
         <div className="fixed inset-0 z-[50] flex items-center justify-center p-4">
-          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             onClick={() => setIsAdminOpen(false)}
           />
-
-          {/* Panel Container */}
-          <div className="relative bg-[#0f1419] border border-cyan-500/40 p-8 rounded-xl max-w-md w-full shadow-[0_0_50px_rgba(6,182,212,0.2)] animate-in zoom-in-95 duration-200">
+          <div className="relative bg-[#0f1419] border border-cyan-500/40 p-8 rounded-xl max-w-md w-full shadow-[0_0_50px_rgba(6,182,212,0.2)] animate-in zoom-in-95">
             <h3 className="text-cyan-400 font-bold mb-6 tracking-widest uppercase border-b border-cyan-500/20 pb-2">
-              System Maintenance
+              Maintenance Mode
             </h3>
             <AdminPanel />
-            <p className="text-[9px] text-cyan-500/40 mt-6 text-center italic">
-              Caution: Modifications to SQLite store are immediate.
-            </p>
           </div>
         </div>
       )}
