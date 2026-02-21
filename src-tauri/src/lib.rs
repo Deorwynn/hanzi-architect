@@ -3,7 +3,7 @@ use rusqlite::{Connection, params_from_iter};
 use tauri::{AppHandle, Manager};
 use tauri_plugin_log::{Target, TargetKind};
 use tauri::path::BaseDirectory;
-use std::env;
+use std::{env};
 use std::fs::File;
 use csv::ReaderBuilder;
 use serde_json::Value;
@@ -235,23 +235,67 @@ async fn get_random_character(handle: tauri::AppHandle) -> Result<CharacterData,
 }
 
 #[tauri::command]
-async fn get_related_characters(handle: AppHandle, radical: String, current_char: String) -> Result<Vec<CharacterData>, String> {
+async fn get_related_characters(
+    handle: tauri::AppHandle, 
+    radical: String, 
+    current_char: String,
+    mode: String,
+    pinyin: String,
+) -> Result<Vec<CharacterData>, String> {
     let db_path = get_db_path(&handle)?;
     let conn = Connection::open_with_flags(&db_path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
         .map_err(|e| e.to_string())?;
 
-    let mut stmt = conn.prepare(
-        "SELECT id, character, definition, pinyin, radical, hsk_level, is_radical, script_type, stroke_count, decomposition, variants, radical_variants, etymology
-         FROM characters 
-         WHERE (radical = ?1 OR radical_variants LIKE ?2) 
-         AND character != ?3
-         ORDER BY hsk_level ASC, stroke_count ASC
-         LIMIT 16"
-    ).map_err(|e| e.to_string())?;
+    let (query, params) = match mode.as_str() {
+        "HSK" => {
+            let sql = "SELECT * FROM characters 
+                       WHERE hsk_level = (SELECT hsk_level FROM characters WHERE character = ?1) 
+                       AND character != ?1 
+                       ORDER BY character ASC";
+            (sql.to_string(), vec![current_char])
+        },
+        "Sound" => {
+            let decomp_query: String = conn.query_row(
+                "SELECT decomposition FROM characters WHERE character = ?1",
+                [&current_char],
+                |row| row.get(0),
+            ).unwrap_or_default();
 
-    let radical_pattern = format!("%{}%", radical);
+            let phonetic_part = if decomp_query.starts_with('⿰') && decomp_query.chars().count() >= 3 {
+                decomp_query.chars().nth(2).unwrap_or(' ').to_string()
+            } else {
+                "__NONE__".to_string()
+            };
 
-    let rows = stmt.query_map([radical, radical_pattern, current_char], |row| {
+            let pinyin_no_tone = pinyin.chars().filter(|c| !c.is_numeric()).collect::<String>();
+            
+            let sql = "SELECT * FROM characters 
+                       WHERE (
+                         (pinyin LIKE ?1 OR pinyin GLOB ?2) 
+                         OR (decomposition LIKE ?3)
+                       )
+                       AND character != ?4 
+                       ORDER BY pinyin ASC";
+            
+            (sql.to_string(), vec![
+                format!("{}%", pinyin_no_tone), 
+                format!("{}[1-5]", pinyin_no_tone),
+                format!("%{}%", phonetic_part),
+                current_char
+            ])
+        },
+        _ => {
+            let sql = "SELECT * FROM characters 
+                       WHERE (radical = ?1 OR radical_variants LIKE ?2) 
+                       AND character != ?3 
+                       ORDER BY hsk_level ASC, stroke_count ASC";
+            (sql.to_string(), vec![radical.clone(), format!("%{}%", radical), current_char])
+        }
+    };
+
+    let mut stmt = conn.prepare(&query).map_err(|e| e.to_string())?;
+    
+    let rows = stmt.query_map(rusqlite::params_from_iter(params), |row| {
         Ok(CharacterData {
             id: row.get(0)?,
             character: row.get(1)?,
@@ -273,9 +317,11 @@ async fn get_related_characters(handle: AppHandle, radical: String, current_char
     for row in rows {
         results.push(row.map_err(|e| e.to_string())?);
     }
-    
+
     Ok(results)
 }
+
+
 
 #[tauri::command]
 async fn backup_database(handle: tauri::AppHandle) -> Result<String, String> {

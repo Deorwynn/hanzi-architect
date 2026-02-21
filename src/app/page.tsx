@@ -12,6 +12,8 @@ import StatusBadge from '@/components/ui/StatusBadge';
 import { useRandomCharacter } from '../hooks/useRandomCharacter';
 import RelatedUnitsSidebar from '@/components/ui/RelatedUnitsSidebar';
 
+type RelationshipMode = 'Radical' | 'Sound' | 'HSK';
+
 export default function HanziArchitect() {
   const [searchQuery, setSearchQuery] = useState('');
   const [characterData, setCharacterData] = useState<CharacterData | null>(
@@ -21,6 +23,7 @@ export default function HanziArchitect() {
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState<CharacterData[]>([]);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [sidebarMode, setSidebarMode] = useState<RelationshipMode>('Radical');
 
   /**
    * CENTRALIZED FETCH LOGIC
@@ -287,6 +290,8 @@ export default function HanziArchitect() {
               currentCharacter={characterData.character}
               onSelect={performSearch}
               hskLevel={characterData.hsk_level}
+              mode={sidebarMode}
+              setMode={setSidebarMode}
             />
           </div>
         ) : (

@@ -9,6 +9,8 @@ interface RelatedUnitsSidebarProps {
   currentCharacter: string;
   onSelect: (char: string) => void;
   hskLevel?: number | null;
+  mode: RelationshipMode;
+  setMode: (mode: RelationshipMode) => void;
 }
 
 type RelationshipMode = 'Radical' | 'Sound' | 'HSK';
@@ -19,10 +21,11 @@ export default function RelatedUnitsSidebar({
   currentCharacter,
   onSelect,
   hskLevel,
+  mode,
+  setMode,
 }: RelatedUnitsSidebarProps) {
   const [related, setRelated] = useState<CharacterData[]>([]);
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState<RelationshipMode>('Radical');
 
   const gridRef = useRef<HTMLDivElement>(null);
   const [columns, setColumns] = useState(4);
@@ -63,6 +66,8 @@ export default function RelatedUnitsSidebar({
           {
             radical,
             currentChar: currentCharacter,
+            mode,
+            pinyin,
           },
         );
         setRelated(results);
