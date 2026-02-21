@@ -10,6 +10,9 @@ import DecompositionGrid from '../components/ui/DecompositionGrid';
 import AdminPanel from '@/components/AdminPanel';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { useRandomCharacter } from '../hooks/useRandomCharacter';
+import RelatedUnitsSidebar from '@/components/ui/RelatedUnitsSidebar';
+
+type RelationshipMode = 'Radical' | 'Sound' | 'HSK';
 
 export default function HanziArchitect() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,6 +23,7 @@ export default function HanziArchitect() {
   const [loading, setLoading] = useState(false);
   const [history, setHistory] = useState<CharacterData[]>([]);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [sidebarMode, setSidebarMode] = useState<RelationshipMode>('Radical');
 
   /**
    * CENTRALIZED FETCH LOGIC
@@ -280,44 +284,15 @@ export default function HanziArchitect() {
             </section>
 
             {/* RELATED CHARACTERS */}
-            <aside
-              className="
-                bg-[#161f27]/30 border border-cyan-500/10 rounded-lg p-5 
-                order-3 lg:order-1 
-                md:col-span-2 lg:col-span-1 
-                lg:sticky lg:top-8"
-            >
-              <div className="flex items-center justify-between mb-4 border-b border-cyan-500/10 pb-2">
-                <span className="text-[10px] uppercase font-bold text-cyan-400">
-                  Related Characters
-                </span>
-                <div className="flex gap-2">
-                  <span className="text-[9px] bg-cyan-500/10 px-2 py-0.5 rounded text-cyan-500 font-mono uppercase">
-                    Radical
-                  </span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-6 md:grid-cols-10 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                {[...Array(16)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="aspect-square border border-cyan-500/10 bg-cyan-500/[0.02] hover:border-cyan-500/40 hover:bg-cyan-500/5 flex items-center justify-center text-cyan-200/20 cursor-pointer transition-all text-lg font-light max-h-[80px]"
-                  >
-                    ?
-                  </div>
-                ))}
-              </div>
-
-              <button className="w-full mt-4 pt-3 border-t border-cyan-500/5 text-left group">
-                <span className="text-[10px] text-cyan-500/40 group-hover:text-cyan-400 transition-colors flex items-center justify-between uppercase tracking-wider">
-                  View all HSK (3.0) {characterData.hsk_level ?? '1'} characters
-                  <span className="opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-4px] group-hover:translate-x-0">
-                    →
-                  </span>
-                </span>
-              </button>
-            </aside>
+            <RelatedUnitsSidebar
+              radical={characterData.radical}
+              pinyin={characterData.pinyin}
+              currentCharacter={characterData.character}
+              onSelect={performSearch}
+              hskLevel={characterData.hsk_level}
+              mode={sidebarMode}
+              setMode={setSidebarMode}
+            />
           </div>
         ) : (
           <div className="bg-[#161f27]/30 text-center py-40 border border-dashed border-cyan-500/10 rounded-2xl mt-10 px-8 md:px-20">

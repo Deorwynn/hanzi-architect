@@ -3,7 +3,7 @@ use rusqlite::{Connection, params_from_iter};
 use tauri::{AppHandle, Manager};
 use tauri_plugin_log::{Target, TargetKind};
 use tauri::path::BaseDirectory;
-use std::env;
+use std::{env};
 use std::fs::File;
 use csv::ReaderBuilder;
 use serde_json::Value;
@@ -235,6 +235,95 @@ async fn get_random_character(handle: tauri::AppHandle) -> Result<CharacterData,
 }
 
 #[tauri::command]
+async fn get_related_characters(
+    handle: tauri::AppHandle, 
+    radical: String, 
+    current_char: String,
+    mode: String,
+    pinyin: String,
+) -> Result<Vec<CharacterData>, String> {
+    let db_path = get_db_path(&handle)?;
+    let conn = Connection::open_with_flags(&db_path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
+        .map_err(|e| e.to_string())?;
+
+    let (query, params) = match mode.as_str() {
+        "HSK" => {
+            let sql = "SELECT * FROM characters 
+                       WHERE hsk_level = (SELECT hsk_level FROM characters WHERE character = ?1) 
+                       AND character != ?1 
+                       ORDER BY character ASC";
+            (sql.to_string(), vec![current_char])
+        },
+        "Sound" => {
+            let decomp_query: String = conn.query_row(
+                "SELECT decomposition FROM characters WHERE character = ?1",
+                [&current_char],
+                |row| row.get(0),
+            ).unwrap_or_default();
+
+            let phonetic_part = if decomp_query.starts_with('⿰') && decomp_query.chars().count() >= 3 {
+                decomp_query.chars().nth(2).unwrap_or(' ').to_string()
+            } else {
+                "__NONE__".to_string()
+            };
+
+            let pinyin_no_tone = pinyin.chars().filter(|c| !c.is_numeric()).collect::<String>();
+            
+            let sql = "SELECT * FROM characters 
+                       WHERE (
+                         (pinyin LIKE ?1 OR pinyin GLOB ?2) 
+                         OR (decomposition LIKE ?3)
+                       )
+                       AND character != ?4 
+                       ORDER BY pinyin ASC";
+            
+            (sql.to_string(), vec![
+                format!("{}%", pinyin_no_tone), 
+                format!("{}[1-5]", pinyin_no_tone),
+                format!("%{}%", phonetic_part),
+                current_char
+            ])
+        },
+        _ => {
+            let sql = "SELECT * FROM characters 
+                       WHERE (radical = ?1 OR radical_variants LIKE ?2) 
+                       AND character != ?3 
+                       ORDER BY hsk_level ASC, stroke_count ASC";
+            (sql.to_string(), vec![radical.clone(), format!("%{}%", radical), current_char])
+        }
+    };
+
+    let mut stmt = conn.prepare(&query).map_err(|e| e.to_string())?;
+    
+    let rows = stmt.query_map(rusqlite::params_from_iter(params), |row| {
+        Ok(CharacterData {
+            id: row.get(0)?,
+            character: row.get(1)?,
+            definition: row.get(2).unwrap_or_default(),
+            pinyin: row.get(3).unwrap_or_default(),
+            radical: row.get(4).unwrap_or_default(),
+            hsk_level: row.get(5).ok(),
+            is_radical: row.get(6).unwrap_or(false),
+            script_type: row.get(7).ok(),
+            stroke_count: row.get(8).ok(),
+            decomposition: row.get(9).ok(),
+            variants: row.get(10).ok(),
+            radical_variants: row.get(11).ok(),
+            etymology: row.get(12).ok(),
+        })
+    }).map_err(|e| e.to_string())?;
+
+    let mut results = Vec::new();
+    for row in rows {
+        results.push(row.map_err(|e| e.to_string())?);
+    }
+
+    Ok(results)
+}
+
+
+
+#[tauri::command]
 async fn backup_database(handle: tauri::AppHandle) -> Result<String, String> {
     let db_path = get_db_path(&handle)?;
     let mut backup_path = db_path.clone();
@@ -262,7 +351,8 @@ pub fn run() {
             sync_hsk_levels,
             backup_database,
             import_dictionary_data,
-            get_random_character
+            get_random_character,
+            get_related_characters
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
