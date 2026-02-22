@@ -51,7 +51,7 @@ export default function InfoCard({
             Semantic Definition
           </span>
           <p className="text-sm text-white/80 leading-relaxed italic text-center">
-            "{definition}"
+            {definition || 'No definition available'}
           </p>
         </div>
       </div>

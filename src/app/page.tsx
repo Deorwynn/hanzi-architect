@@ -169,9 +169,13 @@ export default function HanziArchitect() {
           <button
             onClick={triggerShuffle}
             disabled={isShuffling}
-            className="text-[10px] border border-cyan-500/20 px-4 py-2 rounded hover:bg-cyan-500/10 transition-all text-cyan-400 uppercase tracking-widest"
+            className="text-[10px] border border-cyan-500/20 px-4 py-2 rounded hover:bg-cyan-500/10 transition-all text-cyan-400 uppercase tracking-widest w-32 flex items-center justify-center"
           >
-            {isShuffling ? 'Syncing...' : '🎲 Random'}
+            {isShuffling ? (
+              <span className="animate-pulse">Syncing...</span>
+            ) : (
+              '🎲 Random'
+            )}
           </button>
         </div>
 
