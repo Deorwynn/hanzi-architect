@@ -37,7 +37,14 @@ export default function DecompositionGrid({
     fetchComponents();
   }, [decomposition]);
 
-  if (!decomposition || (components.length === 0 && !loading)) return null;
+  if (!decomposition) return null;
+  if (loading)
+    return (
+      <div className="flex justify-center py-6 opacity-30 animate-pulse text-[10px] uppercase tracking-widest">
+        Scanning Components...
+      </div>
+    );
+  if (components.length === 0) return null;
 
   const ChipLeads = ({ side }: { side: 'left' | 'right' }) => (
     <div
@@ -55,7 +62,7 @@ export default function DecompositionGrid({
   return (
     <section
       aria-label="Character Decomposition"
-      className="lg:mt-2 lg:pt-6  lg:border-t border-cyan-500/10 animate-in fade-in duration-1000"
+      className="lg:mt-2 lg:pt-6 lg:border-t border-cyan-500/10 animate-in fade-in duration-1000"
     >
       <div
         className="
@@ -72,7 +79,7 @@ export default function DecompositionGrid({
 
           return (
             <div
-              key={comp.id}
+              key={comp.id || `${comp.character}-${idx}`} // Fallback key if id is null
               className="w-[100px] relative flex flex-col items-center"
             >
               {/* VERTICAL WIRE */}
@@ -118,7 +125,7 @@ export default function DecompositionGrid({
                 >
                   <div className="text-center px-3">
                     <p className="text-[10px] leading-tight text-white font-mono uppercase tracking-wide">
-                      {comp.definition.split(';')[0]}
+                      {comp.definition?.split(/[;/,]/)[0] || 'Unknown'}
                     </p>
                     <div className="mt-2 h-px w-8 bg-current mx-auto opacity-50" />
                   </div>

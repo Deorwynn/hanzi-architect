@@ -58,19 +58,11 @@ export default function AdminPanel() {
         </button>
 
         <button
-          onClick={() => runCommand('sync_hsk_levels', 'HSK_SYNC')}
+          onClick={() => runCommand('initialize_database', 'MASTER_REBUILD')}
           disabled={loading}
           className="w-full py-2 text-[10px] uppercase bg-red-950/20 border border-red-500/50 text-red-400 hover:bg-red-500 hover:text-white transition-all"
         >
-          2. Sync_HSK_Levels
-        </button>
-
-        <button
-          onClick={() => runCommand('import_dictionary_data', 'DICT_IMPORT')}
-          disabled={loading}
-          className="w-full py-2 text-[10px] uppercase bg-emerald-950/20 border border-emerald-500/50 text-emerald-400 hover:bg-emerald-500 hover:text-white transition-all"
-        >
-          3. Rebuild_Structures
+          2. Master_Rebuild
         </button>
       </div>
     </div>

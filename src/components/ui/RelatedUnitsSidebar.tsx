@@ -58,16 +58,16 @@ export default function RelatedUnitsSidebar({
 
   useEffect(() => {
     async function fetchRelated() {
-      if (!radical) return;
+      if (!radical && mode === 'Radical') return;
       setLoading(true);
       try {
         const results = await invoke<CharacterData[]>(
           'get_related_characters',
           {
-            radical,
+            radical: radical || '',
             currentChar: currentCharacter,
             mode,
-            pinyin,
+            pinyin: pinyin || '',
           },
         );
         setRelated(results);
@@ -78,7 +78,7 @@ export default function RelatedUnitsSidebar({
       }
     }
     fetchRelated();
-  }, [radical, currentCharacter, mode]);
+  }, [radical, currentCharacter, mode, pinyin]);
 
   return (
     <aside className="bg-[#161f27]/30 border border-cyan-500/10 rounded-lg p-5 order-3 lg:order-1 md:col-span-2 lg:col-span-1 lg:sticky lg:top-8">
@@ -104,8 +104,9 @@ export default function RelatedUnitsSidebar({
         </div>
         <p className="text-[10px] text-cyan-500/50 uppercase tracking-[0.2em] mt-3 min-h-[1.2em]">
           {mode === 'HSK' && `Characters at HSK (3.0) level ${hskLevel ?? '1'}`}
-          {mode === 'Sound' && `Characters pronounced "${pinyin}"`}
-          {mode === 'Radical' && `Characters with radical "${radical}"`}
+          {mode === 'Sound' && `Characters pronounced "${pinyin || '??'}"`}
+          {mode === 'Radical' &&
+            `Characters with radical "${radical || 'N/A'}"`}
         </p>
       </div>
 
@@ -128,22 +129,31 @@ export default function RelatedUnitsSidebar({
         ) : displayedRelated.length > 0 ? (
           /* DATA FOUND STATE */
           <>
-            {displayedRelated.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => onSelect(item.character)}
-                className="group aspect-square border border-dashed border-cyan-500/10 bg-cyan-500/[0.02] hover:border-cyan-500/40 hover:bg-cyan-500/10 flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden relative focus:outline-none focus:ring-2 focus:ring-cyan-400/50"
-                title={`${item.character} (${item.pinyin}): ${item.definition}`}
-              >
-                <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
-                <span className="text-[10px] leading-none text-cyan-500/60 group-hover:text-cyan-400/80 transition-colors uppercase tracking-tighter mb-0.5 z-10">
-                  {item.pinyin.replace(/[0-9]/g, '')}
-                </span>
-                <span className="text-2xl font-light text-cyan-100 group-hover:scale-110 transition-transform z-10">
-                  {item.character}
-                </span>
-              </button>
-            ))}
+            {displayedRelated.map((item) => {
+              const safePinyin = item.pinyin
+                ? item.pinyin.replace(/[0-9]/g, '')
+                : '??';
+              const firstDef = item.definition
+                ? item.definition.split(/[;/,]/)[0]
+                : 'No definition';
+
+              return (
+                <button
+                  key={item.id || item.character}
+                  onClick={() => onSelect(item.character)}
+                  className="group aspect-square border border-dashed border-cyan-500/10 bg-cyan-500/[0.02] hover:border-cyan-500/40 hover:bg-cyan-500/10 flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden relative focus:outline-none focus:ring-2 focus:ring-cyan-400/50"
+                  title={`${item.character} (${item.pinyin ?? '??'}): ${firstDef}`}
+                >
+                  <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]" />
+                  <span className="text-[10px] leading-none text-cyan-500/60 group-hover:text-cyan-400/80 transition-colors uppercase tracking-tighter mb-0.5 z-10">
+                    {safePinyin}
+                  </span>
+                  <span className="text-2xl font-light text-cyan-100 group-hover:scale-110 transition-transform z-10">
+                    {item.character}
+                  </span>
+                </button>
+              );
+            })}
 
             {placeholdersNeeded > 0 &&
               [...Array(placeholdersNeeded)].map((_, i) => (
@@ -166,7 +176,7 @@ export default function RelatedUnitsSidebar({
         )}
       </div>
 
-      {/* FOOTER WITH VIEW ALL BUTTON */}
+      {/* FOOTER */}
       <button className="w-full mt-6 pt-3 border-t border-cyan-500/5 text-left group cursor-pointer">
         <span className="text-[10px] text-cyan-500/50 group-hover:text-cyan-400 transition-colors flex items-center justify-start uppercase tracking-wider">
           View all {mode} results ({related.length})
