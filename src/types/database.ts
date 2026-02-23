@@ -1,15 +1,15 @@
 export interface CharacterData {
-  id: number;
+  id?: number;
   character: string;
-  pinyin: string;
-  radical: string;
-  definition: string;
+  traditional_variant: string | null;
+  simplified_variant: string | null;
+  variants?: string | null;
+  is_radical?: boolean;
+  pinyin: string | null;
+  definition: string | null;
   hsk_level: number | null;
-  is_radical: boolean;
-  script_type: 'S' | 'T' | 'B' | null;
-  stroke_count: number | null;
+  radical: string | null;
   decomposition: string | null;
-  variants: string | null;
-  radical_variants: string | null;
-  etymology: string | null;
+  etymology: any;
+  script_type: string;
 }
