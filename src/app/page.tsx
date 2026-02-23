@@ -2,13 +2,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { CharacterData } from '../types/database';
-import { getHskStyle } from '../utils/hskStyles';
 import InfoCard from '@/components/ui/InfoCard';
 import CharacterHero from '../components/ui/CharacterHero';
 import HistoryBar from '../components/ui/HistoryBar';
 import DecompositionGrid from '../components/ui/DecompositionGrid';
 import AdminPanel from '@/components/AdminPanel';
-import StatusBadge from '@/components/ui/StatusBadge';
+import CharacterMetadata from '@/components/ui/metadata/CharacterMetadata';
 import { useRandomCharacter } from '../hooks/useRandomCharacter';
 import RelatedUnitsSidebar from '@/components/ui/RelatedUnitsSidebar';
 
@@ -223,48 +222,10 @@ export default function HanziArchitect() {
                 />
               </div>
 
-              <div className="flex flex-wrap justify-center gap-2 mt-6 max-w-xs mx-auto">
-                <StatusBadge
-                  label="HSK"
-                  value={characterData.hsk_level ?? 'N/A'}
-                  className={getHskStyle(characterData.hsk_level).badgeClass}
-                />
-                <StatusBadge
-                  label="字体"
-                  value={
-                    characterData.script_type === 'S'
-                      ? 'Simplified'
-                      : characterData.script_type === 'T'
-                        ? 'Traditional'
-                        : 'Universal'
-                  }
-                  className="bg-blue-500/10 text-blue-400 border-blue-500/30"
-                />
-                {characterData.variants && (
-                  <button
-                    onClick={() => performSearch(characterData.variants!)}
-                    className="group outline-none"
-                  >
-                    <StatusBadge
-                      label={
-                        <span className="flex items-center gap-1.5">
-                          <span
-                            aria-hidden="true"
-                            className="opacity-50 group-hover:opacity-100 transition-opacity"
-                          >
-                            ⇄
-                          </span>
-                          {characterData.script_type === 'S'
-                            ? 'Traditional'
-                            : 'Simplified'}
-                        </span>
-                      }
-                      value={characterData.variants}
-                      className="bg-lime-500/10 text-lime-400 border-lime-500/30 hover:bg-lime-500/20 shadow-[0_0_10px_rgba(163,230,53,0.1)]"
-                    />
-                  </button>
-                )}
-              </div>
+              <CharacterMetadata
+                data={characterData}
+                onVariantClick={performSearch}
+              />
             </section>
 
             {/* TECHNICAL INFO */}
@@ -272,9 +233,11 @@ export default function HanziArchitect() {
               <div className="flex flex-col sm:flex-row lg:flex-col gap-6 items-start">
                 {/* Info Card - Left Side on Tablet */}
                 <InfoCard
-                  pinyin={characterData.pinyin}
-                  radical={characterData.radical}
-                  definition={characterData.definition}
+                  pinyin={characterData.pinyin ?? ''}
+                  radical={characterData.radical ?? 'N/A'}
+                  definition={
+                    characterData.definition ?? 'No definition available.'
+                  }
                 />
 
                 {/* DECOMPOSITION GRID */}
@@ -289,8 +252,8 @@ export default function HanziArchitect() {
 
             {/* RELATED CHARACTERS */}
             <RelatedUnitsSidebar
-              radical={characterData.radical}
-              pinyin={characterData.pinyin}
+              pinyin={characterData.pinyin ?? ''}
+              radical={characterData.radical ?? 'N/A'}
               currentCharacter={characterData.character}
               onSelect={performSearch}
               hskLevel={characterData.hsk_level}
