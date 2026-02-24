@@ -16,9 +16,11 @@ export default function DecompositionGrid({
   const [components, setComponents] = useState<CharacterData[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const hasNoData = !decomposition || decomposition === '？';
+
   useEffect(() => {
     const fetchComponents = async () => {
-      if (!decomposition) {
+      if (hasNoData) {
         setComponents([]);
         return;
       }
@@ -35,16 +37,39 @@ export default function DecompositionGrid({
       }
     };
     fetchComponents();
-  }, [decomposition]);
+  }, [decomposition, hasNoData]);
 
-  if (!decomposition) return null;
   if (loading)
     return (
       <div className="flex justify-center py-6 opacity-30 animate-pulse text-[10px] uppercase tracking-widest">
         Scanning Components...
       </div>
     );
-  if (components.length === 0) return null;
+
+  // FALLBACK UI: When no decomposition exists
+  if (hasNoData || (components.length === 0 && !loading)) {
+    return (
+      <div className="mt-4 p-4 border border-dashed border-cyan-500/10 rounded-lg bg-cyan-950/5 group/atomic transition-colors">
+        <div className="flex items-center gap-3">
+          <span
+            aria-hidden="true"
+            className="text-cyan-400 font-mono text-xs animate-glitch-fast"
+          >
+            [!]
+          </span>
+
+          <div className="flex flex-col">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-cyan-500 transition-colors">
+              Atomic Unit Identified
+            </p>
+            <p className="text-[10px] text-cyan-500/40 uppercase tracking-[0.1em] mt-0.5">
+              Structural analysis complete: no sub-components found
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const ChipLeads = ({ side }: { side: 'left' | 'right' }) => (
     <div
@@ -79,7 +104,7 @@ export default function DecompositionGrid({
 
           return (
             <div
-              key={comp.id || `${comp.character}-${idx}`} // Fallback key if id is null
+              key={comp.id || `${comp.character}-${idx}`}
               className="w-[100px] relative flex flex-col items-center"
             >
               {/* VERTICAL WIRE */}
