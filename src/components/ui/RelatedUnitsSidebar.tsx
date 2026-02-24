@@ -11,6 +11,7 @@ interface RelatedUnitsSidebarProps {
   hskLevel?: number | null;
   mode: RelationshipMode;
   setMode: (mode: RelationshipMode) => void;
+  onOpenExpandedView: (title: string, data: CharacterData[]) => void;
 }
 
 type RelationshipMode = 'Radical' | 'Sound' | 'HSK';
@@ -23,6 +24,7 @@ export default function RelatedUnitsSidebar({
   hskLevel,
   mode,
   setMode,
+  onOpenExpandedView,
 }: RelatedUnitsSidebarProps) {
   const [related, setRelated] = useState<CharacterData[]>([]);
   const [loading, setLoading] = useState(false);
@@ -177,17 +179,22 @@ export default function RelatedUnitsSidebar({
       </div>
 
       {/* FOOTER */}
-      <button className="w-full mt-6 pt-3 border-t border-cyan-500/5 text-left group cursor-pointer">
-        <span className="text-[10px] text-cyan-500/50 group-hover:text-cyan-400 transition-colors flex items-center justify-start uppercase tracking-wider">
-          View all {mode} results ({related.length})
-          <span
-            aria-hidden="true"
-            className="opacity-0 pl-2 group-hover:opacity-100 transition-all transform translate-x-[-4px] group-hover:translate-x-0"
-          >
-            →
+      {related.length > 0 && (
+        <button
+          onClick={() => onOpenExpandedView(`${mode} Relationships`, related)}
+          className="w-full mt-6 pt-3 border-t border-cyan-500/5 text-left group cursor-pointer"
+        >
+          <span className="text-[10px] text-cyan-500/50 group-hover:text-cyan-400 transition-colors flex items-center justify-start uppercase tracking-wider">
+            View all {mode} results ({related.length})
+            <span
+              aria-hidden="true"
+              className="opacity-0 pl-2 group-hover:opacity-100 transition-all transform translate-x-[-4px] group-hover:translate-x-0"
+            >
+              →
+            </span>
           </span>
-        </span>
-      </button>
+        </button>
+      )}
     </aside>
   );
 }

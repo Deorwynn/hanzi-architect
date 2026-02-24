@@ -10,6 +10,7 @@ import AdminPanel from '@/components/AdminPanel';
 import CharacterMetadata from '@/components/ui/metadata/CharacterMetadata';
 import { useRandomCharacter } from '../hooks/useRandomCharacter';
 import RelatedUnitsSidebar from '@/components/ui/RelatedUnitsSidebar';
+import RelationshipModal from '@/components/ui/RelationshipModal';
 
 type RelationshipMode = 'Radical' | 'Sound' | 'HSK';
 
@@ -23,6 +24,9 @@ export default function HanziArchitect() {
   const [history, setHistory] = useState<CharacterData[]>([]);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [sidebarMode, setSidebarMode] = useState<RelationshipMode>('Radical');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalCharacters, setModalCharacters] = useState<CharacterData[]>([]);
+  const [modalTitle, setModalTitle] = useState('');
 
   /**
    * CENTRALIZED FETCH LOGIC
@@ -229,7 +233,7 @@ export default function HanziArchitect() {
             </section>
 
             {/* TECHNICAL INFO */}
-            <section className="order-2 lg:order-3 w-full">
+            <section className="order-2 lg:order-3 w-full min-w-0">
               <div className="flex flex-col sm:flex-row lg:flex-col gap-6 items-start">
                 {/* Info Card - Left Side on Tablet */}
                 <InfoCard
@@ -259,6 +263,11 @@ export default function HanziArchitect() {
               hskLevel={characterData.hsk_level}
               mode={sidebarMode}
               setMode={setSidebarMode}
+              onOpenExpandedView={(title: string, data: CharacterData[]) => {
+                setModalTitle(title);
+                setModalCharacters(data);
+                setIsModalOpen(true);
+              }}
             />
           </div>
         ) : (
@@ -295,6 +304,15 @@ export default function HanziArchitect() {
           </div>
         </div>
       )}
+
+      {/* RELATIONSHIP EXPANDED VIEW */}
+      <RelationshipModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={modalTitle}
+        characters={modalCharacters}
+        onSelect={performSearch}
+      />
     </div>
   );
 }
