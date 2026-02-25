@@ -5,7 +5,9 @@ use tauri_plugin_log::{Target, TargetKind};
 use tauri::path::BaseDirectory;
 use std::env;
 use std::fs::File;
+use std::fs;
 use std::io::BufReader;
+use chrono::Local;
 
 // --- DATA STRUCTURES ---
 
@@ -260,6 +262,50 @@ async fn get_related_characters(
     Ok(results)
 }
 
+#[tauri::command]
+async fn backup_database(handle: tauri::AppHandle) -> Result<String, String> {
+    let db_path = get_db_path(&handle)?;
+    if !db_path.exists() {
+        return Err("Database file not found. Nothing to backup.".into());
+    }
+
+    let timestamp = Local::now().format("%Y%m%d_%H%M%S").to_string();
+    let backup_path = db_path.with_file_name(format!("hanzi_backup_{}.db", timestamp));
+
+    fs::copy(&db_path, &backup_path).map_err(|e| e.to_string())?;
+
+    Ok(format!("Snapshot created: {:?}", backup_path.file_name().unwrap()))
+}
+
+#[tauri::command]
+async fn save_character_to_json(handle: tauri::AppHandle, updated_char: CharacterData) -> Result<String, String> {
+    let project_root = if cfg!(dev) {
+        let manifest_dir = env!("CARGO_MANIFEST_DIR");
+        std::path::Path::new(manifest_dir).parent().ok_or("Root")?.to_path_buf()
+    } else {
+        handle.path().resource_dir().map_err(|e| e.to_string())?
+    };
+    
+    let file_path = project_root.join("data").join("master_db.json");
+    
+    // 1. Read existing JSON
+    let data = fs::read_to_string(&file_path).map_err(|e| e.to_string())?;
+    let mut db: Vec<CharacterData> = serde_json::from_str(&data).map_err(|e| e.to_string())?;
+
+    // 2. Find and Update
+    if let Some(index) = db.iter().position(|c| c.character == updated_char.character) {
+        db[index] = updated_char;
+        
+        // 3. Write back to file
+        let new_json = serde_json::to_string_pretty(&db).map_err(|e| e.to_string())?;
+        fs::write(file_path, new_json).map_err(|e| e.to_string())?;
+        
+        Ok("JSON Entry Updated Successfully".into())
+    } else {
+        Err("Character not found in master_db.json".into())
+    }
+}
+
 fn get_db_path(handle: &AppHandle) -> Result<std::path::PathBuf, String> {
     if cfg!(dev) {
         let manifest_dir = env!("CARGO_MANIFEST_DIR");
@@ -278,7 +324,9 @@ pub fn run() {
             get_character_details,
             get_component_details,
             get_random_character,
-            get_related_characters
+            get_related_characters,
+            save_character_to_json,
+            backup_database
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
