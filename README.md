@@ -58,7 +58,9 @@ works entirely offline, bypassing the latency of traditional web APIs.
 - [x] Random Character Discovery Search (HAN-12).
 - [x] HSK level, Script Variant and Clickable Character Variant
       (Traditional/Simplified) Badge (HAN-46).
-- [ ] **Next:** Radical Discovery System (Explorer view).
+- [x] Sidebar with settings for script type preference (HAN-58).
+- [ ] **Next:** Audio (TTS).
+- [ ] Radical Discovery System (Explorer view).
 - [ ] Stroke order animation and SVG-based decomposition.
 
 ## 🏮 Data Sources

@@ -11,6 +11,7 @@ import CharacterMetadata from '@/components/ui/metadata/CharacterMetadata';
 import { useRandomCharacter } from '../hooks/useRandomCharacter';
 import RelatedUnitsSidebar from '@/components/ui/RelatedUnitsSidebar';
 import RelationshipModal from '@/components/ui/RelationshipModal';
+import { useSettings } from '@/context/SettingsContext';
 
 type RelationshipMode = 'Radical' | 'Sound' | 'HSK';
 
@@ -27,6 +28,7 @@ export default function HanziArchitect() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalCharacters, setModalCharacters] = useState<CharacterData[]>([]);
   const [modalTitle, setModalTitle] = useState('');
+  const { scriptPreference } = useSettings();
 
   /**
    * CENTRALIZED FETCH LOGIC
@@ -118,16 +120,7 @@ export default function HanziArchitect() {
   const handleComponentClick = (char: string) => performSearch(char);
 
   return (
-    <div className="min-h-screen bg-[#0f1419] text-white relative overflow-hidden font-sans">
-      {/* Blueprint grid background */}
-      <div
-        className="fixed inset-0 opacity-[0.03] pointer-events-none"
-        style={{
-          backgroundImage: `linear-gradient(0deg, transparent 24%, rgba(6, 182, 212, .5) 25%, rgba(6, 182, 212, .5) 26%, transparent 27%, transparent 74%, rgba(6, 182, 212, .5) 75%, rgba(6, 182, 212, .5) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(6, 182, 212, .5) 25%, rgba(6, 182, 212, .5) 26%, transparent 27%, transparent 74%, rgba(6, 182, 212, .5) 75%, rgba(6, 182, 212, .5) 76%, transparent 77%, transparent)`,
-          backgroundSize: '50px 50px',
-        }}
-      />
-
+    <>
       <main
         className={`relative z-10 max-w-[1600px] mx-auto px-6 py-8 ${isAdminOpen ? 'blur-sm transition-all' : ''}`}
       >
@@ -263,6 +256,8 @@ export default function HanziArchitect() {
               hskLevel={characterData.hsk_level}
               mode={sidebarMode}
               setMode={setSidebarMode}
+              scriptFilter={scriptPreference}
+              heroScriptType={characterData.script_type}
               onOpenExpandedView={(title: string, data: CharacterData[]) => {
                 setModalTitle(title);
                 setModalCharacters(data);
@@ -313,6 +308,6 @@ export default function HanziArchitect() {
         characters={modalCharacters}
         onSelect={performSearch}
       />
-    </div>
+    </>
   );
 }

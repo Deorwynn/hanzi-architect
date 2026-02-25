@@ -12,6 +12,8 @@ interface RelatedUnitsSidebarProps {
   mode: RelationshipMode;
   setMode: (mode: RelationshipMode) => void;
   onOpenExpandedView: (title: string, data: CharacterData[]) => void;
+  scriptFilter: 'Simplified' | 'Traditional' | 'Both';
+  heroScriptType: string;
 }
 
 type RelationshipMode = 'Radical' | 'Sound' | 'HSK';
@@ -25,12 +27,43 @@ export default function RelatedUnitsSidebar({
   mode,
   setMode,
   onOpenExpandedView,
+  scriptFilter,
+  heroScriptType,
 }: RelatedUnitsSidebarProps) {
   const [related, setRelated] = useState<CharacterData[]>([]);
   const [loading, setLoading] = useState(false);
 
   const gridRef = useRef<HTMLDivElement>(null);
   const [columns, setColumns] = useState(4);
+
+  const filteredCharacters = useMemo(() => {
+    // 1. Determine the mode.
+    // If the Hero is 'Universal', we use the User's setting.
+    // Otherwise, the Hero (Simplified or Traditional) forces the view.
+    const activeScriptMode =
+      heroScriptType === 'Universal' || !heroScriptType
+        ? scriptFilter
+        : heroScriptType;
+
+    return related.filter((char) => {
+      // If we are currently forced into Simplified (by Hero or Settings)
+      if (activeScriptMode === 'Simplified') {
+        return (
+          char.script_type === 'Simplified' || char.script_type === 'Universal'
+        );
+      }
+
+      // If we are currently forced into Traditional (by Hero or Settings)
+      if (activeScriptMode === 'Traditional') {
+        return (
+          char.script_type === 'Traditional' || char.script_type === 'Universal'
+        );
+      }
+
+      // If activeScriptMode is 'Both' (from Settings), show everything
+      return true;
+    });
+  }, [related, scriptFilter, heroScriptType]);
 
   useEffect(() => {
     const observer = new ResizeObserver((entries) => {
@@ -50,13 +83,13 @@ export default function RelatedUnitsSidebar({
 
   const { displayedRelated, placeholdersNeeded } = useMemo(() => {
     const ceiling = columns * 4;
-    const sliced = related.slice(0, ceiling);
+    const sliced = filteredCharacters.slice(0, ceiling);
     const remainder = sliced.length % columns;
     return {
       displayedRelated: sliced,
       placeholdersNeeded: remainder === 0 ? 0 : columns - remainder,
     };
-  }, [related, columns]);
+  }, [filteredCharacters, columns]);
 
   useEffect(() => {
     async function fetchRelated() {
@@ -83,9 +116,20 @@ export default function RelatedUnitsSidebar({
   }, [radical, currentCharacter, mode, pinyin]);
 
   return (
-    <aside className="bg-[#161f27]/30 border border-cyan-500/10 rounded-lg p-5 order-3 lg:order-1 md:col-span-2 lg:col-span-1 lg:sticky lg:top-8">
+    <aside className="bg-[#161f27]/30 border border-cyan-500/10 backdrop-blur-sm rounded-lg p-5 order-3 lg:order-1 md:col-span-2 lg:col-span-1 lg:sticky lg:top-8">
       {/* HEADER WITH MODE TOGGLE */}
       <div className="mb-6">
+        {heroScriptType !== 'Both' && (
+          <div className="flex items-center gap-2 mb-1.5 h-4">
+            <span aria-hidden="true" className="h-[1px] w-4 bg-cyan-500/20" />
+            <span className="text-[9px] text-cyan-500/40 uppercase tracking-[0.3em] font-mono">
+              {heroScriptType !== 'Both'
+                ? `Filter_Active: ${heroScriptType}`
+                : 'Mode: Universal_Sync'}
+            </span>
+          </div>
+        )}
+
         <h2 className="text-sm text-cyan-500/80 uppercase tracking-[0.2em] mb-3">
           <strong>Explore related characters by:</strong>
         </h2>
@@ -179,13 +223,15 @@ export default function RelatedUnitsSidebar({
       </div>
 
       {/* FOOTER */}
-      {related.length > 0 && (
+      {filteredCharacters.length > 0 && (
         <button
-          onClick={() => onOpenExpandedView(`${mode} Relationships`, related)}
+          onClick={() =>
+            onOpenExpandedView(`${mode} Relationships`, filteredCharacters)
+          }
           className="w-full mt-6 pt-3 border-t border-cyan-500/5 text-left group cursor-pointer"
         >
           <span className="text-[10px] text-cyan-500/50 group-hover:text-cyan-400 transition-colors flex items-center justify-start uppercase tracking-wider">
-            View all {mode} results ({related.length})
+            View all {mode} results ({filteredCharacters.length})
             <span
               aria-hidden="true"
               className="opacity-0 pl-2 group-hover:opacity-100 transition-all transform translate-x-[-4px] group-hover:translate-x-0"

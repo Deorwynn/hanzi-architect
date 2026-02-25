@@ -2,16 +2,18 @@
 import { useEffect, useRef } from 'react';
 
 export function useFocusTrap(isOpen: boolean, onClose: () => void) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (!isOpen) return;
 
     const previousFocus = document.activeElement as HTMLElement;
 
-    if (containerRef.current) {
-      containerRef.current.focus({ preventScroll: true });
-    }
+    const timeoutId = setTimeout(() => {
+      if (containerRef.current) {
+        containerRef.current.focus({ preventScroll: true });
+      }
+    }, 0);
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -45,8 +47,9 @@ export function useFocusTrap(isOpen: boolean, onClose: () => void) {
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
+      clearTimeout(timeoutId);
       window.removeEventListener('keydown', handleKeyDown);
-      if (previousFocus) previousFocus.blur();
+      if (previousFocus && previousFocus.focus) previousFocus.focus();
     };
   }, [isOpen, onClose]);
 
