@@ -27,7 +27,8 @@ export function ModalShell({
       />
 
       <div
-        ref={containerRef}
+        ref={containerRef as React.RefObject<HTMLDivElement>}
+        tabIndex={-1}
         className="relative w-full md:max-w-2xl xl:max-w-6xl max-h-[90vh] bg-[#0f1419] border border-cyan-500/30 rounded-xl flex flex-col shadow-[0_0_50px_rgba(6,182,212,0.15)] overflow-hidden"
       >
         {/* HEADER */}
