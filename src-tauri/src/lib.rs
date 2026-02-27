@@ -1,13 +1,13 @@
+use chrono::Local;
+use rusqlite::{params, params_from_iter, Connection};
 use serde::{Deserialize, Serialize};
-use rusqlite::{Connection, params, params_from_iter};
+use std::env;
+use std::fs;
+use std::fs::File;
+use std::io::BufReader;
+use tauri::path::BaseDirectory;
 use tauri::{AppHandle, Manager};
 use tauri_plugin_log::{Target, TargetKind};
-use tauri::path::BaseDirectory;
-use std::env;
-use std::fs::File;
-use std::fs;
-use std::io::BufReader;
-use chrono::Local;
 
 // --- DATA STRUCTURES ---
 
@@ -40,11 +40,10 @@ fn parse_decomposition(decomp: &str) -> Vec<String> {
 fn map_row_to_character(row: &rusqlite::Row) -> rusqlite::Result<CharacterData> {
     // 1. Get the raw etymology string from the DB
     let etymology_raw: Option<String> = row.get(9).ok();
-    
+
     // 2. Parse it into JSON only if it exists
-    let etymology_json = etymology_raw.and_then(|s| {
-        serde_json::from_str::<serde_json::Value>(&s).ok()
-    });
+    let etymology_json =
+        etymology_raw.and_then(|s| serde_json::from_str::<serde_json::Value>(&s).ok());
 
     Ok(CharacterData {
         id: row.get(0)?,
@@ -69,11 +68,14 @@ const SELECT_FIELDS: &str = "id, character, traditional_variant, simplified_vari
 async fn initialize_database(handle: tauri::AppHandle) -> Result<String, String> {
     let project_root = if cfg!(dev) {
         let manifest_dir = env!("CARGO_MANIFEST_DIR");
-        std::path::Path::new(manifest_dir).parent().ok_or("Root")?.to_path_buf()
+        std::path::Path::new(manifest_dir)
+            .parent()
+            .ok_or("Root")?
+            .to_path_buf()
     } else {
         handle.path().resource_dir().map_err(|e| e.to_string())?
     };
-    
+
     let file_path = project_root.join("data").join("master_db.json");
     let db_path = get_db_path(&handle)?;
     let mut conn = Connection::open(&db_path).map_err(|e| e.to_string())?;
@@ -94,18 +96,20 @@ async fn initialize_database(handle: tauri::AppHandle) -> Result<String, String>
             script_type TEXT
         )",
         [],
-    ).map_err(|e| e.to_string())?;
+    )
+    .map_err(|e| e.to_string())?;
 
     let file = File::open(&file_path).map_err(|e| format!("Master JSON not found: {}", e))?;
     let reader = BufReader::new(file);
-    let master_data: Vec<CharacterData> = serde_json::from_reader(reader).map_err(|e| e.to_string())?;
+    let master_data: Vec<CharacterData> =
+        serde_json::from_reader(reader).map_err(|e| e.to_string())?;
 
     let tx = conn.transaction().map_err(|e| e.to_string())?;
     let mut total_count = 0;
 
     for entry in master_data {
         let etymology_json = entry.etymology.as_ref().map(|v| v.to_string());
-        
+
         tx.execute(
             "INSERT INTO characters (
                 character, traditional_variant, simplified_variant, pinyin, 
@@ -123,7 +127,7 @@ async fn initialize_database(handle: tauri::AppHandle) -> Result<String, String>
                 script_type = excluded.script_type",
             params![
                 entry.character,
-                entry.traditional_variant.as_deref(), 
+                entry.traditional_variant.as_deref(),
                 entry.simplified_variant.as_deref(),
                 entry.pinyin.as_deref(),
                 entry.definition.as_deref(),
@@ -133,66 +137,100 @@ async fn initialize_database(handle: tauri::AppHandle) -> Result<String, String>
                 etymology_json.as_deref(),
                 entry.script_type
             ],
-        ).map_err(|e| format!("Error at {}: {}", entry.character, e))?;
+        )
+        .map_err(|e| format!("Error at {}: {}", entry.character, e))?;
         total_count += 1;
     }
     tx.commit().map_err(|e| e.to_string())?;
 
-    Ok(format!("CORE OVERHAUL COMPLETE: {} records indexed.", total_count))
+    Ok(format!(
+        "CORE OVERHAUL COMPLETE: {} records indexed.",
+        total_count
+    ))
 }
 
 #[tauri::command]
 fn get_character_details(handle: AppHandle, target: String) -> Result<CharacterData, String> {
     let db_path = get_db_path(&handle)?;
-    let conn = Connection::open_with_flags(&db_path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY).map_err(|e| e.to_string())?;
-    
-    let query = format!("SELECT {} FROM characters WHERE character = ?1", SELECT_FIELDS);
+    let conn = Connection::open_with_flags(&db_path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
+        .map_err(|e| e.to_string())?;
+
+    let query = format!(
+        "SELECT {} FROM characters WHERE character = ?1",
+        SELECT_FIELDS
+    );
     conn.query_row(&query, [target], |row| map_row_to_character(row))
         .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-async fn get_component_details(handle: AppHandle, decomp: String) -> Result<Vec<CharacterData>, String> {
+async fn get_component_details(
+    handle: AppHandle,
+    decomp: String,
+) -> Result<Vec<CharacterData>, String> {
     let components = parse_decomposition(&decomp);
-    if components.is_empty() { return Ok(Vec::new()); }
+    if components.is_empty() {
+        return Ok(Vec::new());
+    }
     let db_path = get_db_path(&handle)?;
-    let conn = Connection::open_with_flags(&db_path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY).map_err(|e| e.to_string())?;
-    
+    let conn = Connection::open_with_flags(&db_path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
+        .map_err(|e| e.to_string())?;
+
     let vars = vec!["?"; components.len()].join(", ");
-    let query = format!("SELECT {} FROM characters WHERE character IN ({})", SELECT_FIELDS, vars);
-    
+    let query = format!(
+        "SELECT {} FROM characters WHERE character IN ({})",
+        SELECT_FIELDS, vars
+    );
+
     let mut stmt = conn.prepare(&query).map_err(|e| e.to_string())?;
-    let rows = stmt.query_map(params_from_iter(components.iter()), |row| map_row_to_character(row))
+    let rows = stmt
+        .query_map(params_from_iter(components.iter()), |row| {
+            map_row_to_character(row)
+        })
         .map_err(|e| e.to_string())?; // FIXED line 195
-    
+
     let mut results = Vec::new();
-    for row in rows { results.push(row.map_err(|e| e.to_string())?); }
+    for row in rows {
+        results.push(row.map_err(|e| e.to_string())?);
+    }
     Ok(results)
 }
 
 #[tauri::command]
-async fn get_random_character(handle: tauri::AppHandle) -> Result<CharacterData, String> {
+async fn get_random_character(
+    handle: tauri::AppHandle,
+    script_pref: String,
+) -> Result<CharacterData, String> {
     let db_path = get_db_path(&handle)?;
-    let conn = Connection::open_with_flags(&db_path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY).map_err(|e| e.to_string())?;
-    
+    let conn = Connection::open_with_flags(&db_path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
+        .map_err(|e| e.to_string())?;
+
+    let script_filter = match script_pref.as_str() {
+        "Simplified" => "AND (script_type = 'Simplified' OR script_type = 'Universal')",
+        "Traditional" => "AND (script_type = 'Traditional' OR script_type = 'Universal')",
+        _ => "",
+    };
+
     let query = format!(
-        "SELECT {} FROM characters WHERE LENGTH(character) = 1 ORDER BY RANDOM() LIMIT 1", 
-        SELECT_FIELDS
+        "SELECT {} FROM characters WHERE LENGTH(character) = 1 {} ORDER BY RANDOM() LIMIT 1",
+        SELECT_FIELDS, script_filter
     );
-    
-    conn.query_row(&query, [], |row| map_row_to_character(row)).map_err(|e| e.to_string())
+
+    conn.query_row(&query, [], |row| map_row_to_character(row))
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 async fn get_related_characters(
-    handle: tauri::AppHandle, 
-    radical: String, 
+    handle: tauri::AppHandle,
+    radical: String,
     current_char: String,
     mode: String,
     pinyin: String,
 ) -> Result<Vec<CharacterData>, String> {
     let db_path = get_db_path(&handle)?;
-    let conn = Connection::open_with_flags(&db_path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY).map_err(|e| e.to_string())?;
+    let conn = Connection::open_with_flags(&db_path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
+        .map_err(|e| e.to_string())?;
 
     // 1. Define the SQL and parameters based on the mode
     let (sql_query, query_params) = match mode.as_str() {
@@ -202,62 +240,73 @@ async fn get_related_characters(
                  WHERE hsk_level = (SELECT hsk_level FROM characters WHERE character = ?1) 
                  AND character != ?1 
                  AND LENGTH(character) = 1 
-                 ORDER BY character ASC", 
+                 ORDER BY character ASC",
                 SELECT_FIELDS
             ),
-            vec![current_char]
+            vec![current_char],
         ),
         "Sound" => {
-            let decomp_query: String = conn.query_row(
-                "SELECT decomposition FROM characters WHERE character = ?1", 
-                [&current_char], 
-                |row| row.get(0)
-            ).unwrap_or_default();
+            let decomp_query: String = conn
+                .query_row(
+                    "SELECT decomposition FROM characters WHERE character = ?1",
+                    [&current_char],
+                    |row| row.get(0),
+                )
+                .unwrap_or_default();
 
-            let phonetic_part = if decomp_query.starts_with('⿰') && decomp_query.chars().count() >= 3 {
-                decomp_query.chars().nth(2).unwrap_or(' ').to_string()
-            } else { "__NONE__".to_string() };
+            let phonetic_part =
+                if decomp_query.starts_with('⿰') && decomp_query.chars().count() >= 3 {
+                    decomp_query.chars().nth(2).unwrap_or(' ').to_string()
+                } else {
+                    "__NONE__".to_string()
+                };
 
-            let pinyin_no_tone = pinyin.chars().filter(|c| !c.is_numeric()).collect::<String>();
-            
+            let pinyin_no_tone = pinyin
+                .chars()
+                .filter(|c| !c.is_numeric())
+                .collect::<String>();
+
             (
                 format!(
                     "SELECT {} FROM characters 
                      WHERE ((pinyin LIKE ?1 OR pinyin GLOB ?2) OR (decomposition LIKE ?3)) 
                      AND character != ?4 
                      AND LENGTH(character) = 1 
-                     ORDER BY pinyin ASC", 
+                     ORDER BY pinyin ASC",
                     SELECT_FIELDS
                 ),
                 vec![
-                    format!("{}%", pinyin_no_tone), 
-                    format!("{}[1-5]", pinyin_no_tone), 
-                    format!("%{}%", phonetic_part), 
-                    current_char
-                ]
+                    format!("{}%", pinyin_no_tone),
+                    format!("{}[1-5]", pinyin_no_tone),
+                    format!("%{}%", phonetic_part),
+                    current_char,
+                ],
             )
-        },
+        }
         _ => (
             format!(
                 "SELECT {} FROM characters 
                  WHERE (radical = ?1 OR (radical IS NULL AND character = ?1)) 
                  AND character != ?2 
                  AND LENGTH(character) = 1 
-                 ORDER BY hsk_level ASC, id ASC", 
+                 ORDER BY hsk_level ASC, id ASC",
                 SELECT_FIELDS
             ),
-            vec![radical.clone(), current_char]
-        )
+            vec![radical.clone(), current_char],
+        ),
     };
 
     // 2. Prepare and execute the statement
     let mut stmt = conn.prepare(&sql_query).map_err(|e| e.to_string())?;
-    let rows = stmt.query_map(params_from_iter(query_params), |row| map_row_to_character(row))
+    let rows = stmt
+        .query_map(params_from_iter(query_params), |row| {
+            map_row_to_character(row)
+        })
         .map_err(|e| e.to_string())?;
-    
+
     let mut results = Vec::new();
-    for row in rows { 
-        results.push(row.map_err(|e| e.to_string())?); 
+    for row in rows {
+        results.push(row.map_err(|e| e.to_string())?);
     }
     Ok(results)
 }
@@ -274,32 +323,44 @@ async fn backup_database(handle: tauri::AppHandle) -> Result<String, String> {
 
     fs::copy(&db_path, &backup_path).map_err(|e| e.to_string())?;
 
-    Ok(format!("Snapshot created: {:?}", backup_path.file_name().unwrap()))
+    Ok(format!(
+        "Snapshot created: {:?}",
+        backup_path.file_name().unwrap()
+    ))
 }
 
 #[tauri::command]
-async fn save_character_to_json(handle: tauri::AppHandle, updated_char: CharacterData) -> Result<String, String> {
+async fn save_character_to_json(
+    handle: tauri::AppHandle,
+    updated_char: CharacterData,
+) -> Result<String, String> {
     let project_root = if cfg!(dev) {
         let manifest_dir = env!("CARGO_MANIFEST_DIR");
-        std::path::Path::new(manifest_dir).parent().ok_or("Root")?.to_path_buf()
+        std::path::Path::new(manifest_dir)
+            .parent()
+            .ok_or("Root")?
+            .to_path_buf()
     } else {
         handle.path().resource_dir().map_err(|e| e.to_string())?
     };
-    
+
     let file_path = project_root.join("data").join("master_db.json");
-    
+
     // 1. Read existing JSON
     let data = fs::read_to_string(&file_path).map_err(|e| e.to_string())?;
     let mut db: Vec<CharacterData> = serde_json::from_str(&data).map_err(|e| e.to_string())?;
 
     // 2. Find and Update
-    if let Some(index) = db.iter().position(|c| c.character == updated_char.character) {
+    if let Some(index) = db
+        .iter()
+        .position(|c| c.character == updated_char.character)
+    {
         db[index] = updated_char;
-        
+
         // 3. Write back to file
         let new_json = serde_json::to_string_pretty(&db).map_err(|e| e.to_string())?;
         fs::write(file_path, new_json).map_err(|e| e.to_string())?;
-        
+
         Ok("JSON Entry Updated Successfully".into())
     } else {
         Err("Character not found in master_db.json".into())
@@ -309,16 +370,29 @@ async fn save_character_to_json(handle: tauri::AppHandle, updated_char: Characte
 fn get_db_path(handle: &AppHandle) -> Result<std::path::PathBuf, String> {
     if cfg!(dev) {
         let manifest_dir = env!("CARGO_MANIFEST_DIR");
-        Ok(std::path::Path::new(manifest_dir).parent().ok_or("Root failed")?.join("hanzi.db"))
+        Ok(std::path::Path::new(manifest_dir)
+            .parent()
+            .ok_or("Root failed")?
+            .join("hanzi.db"))
     } else {
-        handle.path().resolve("hanzi.db", BaseDirectory::Resource).map_err(|e| e.to_string())
+        handle
+            .path()
+            .resolve("hanzi.db", BaseDirectory::Resource)
+            .map_err(|e| e.to_string())
     }
 }
 
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
-        .plugin(tauri_plugin_log::Builder::new().targets([Target::new(TargetKind::Stdout), Target::new(TargetKind::Webview)]).build())
+        .plugin(
+            tauri_plugin_log::Builder::new()
+                .targets([
+                    Target::new(TargetKind::Stdout),
+                    Target::new(TargetKind::Webview),
+                ])
+                .build(),
+        )
         .invoke_handler(tauri::generate_handler![
             initialize_database,
             get_character_details,
