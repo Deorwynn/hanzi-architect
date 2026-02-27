@@ -11,11 +11,6 @@ export const useSpeech = () => {
       const loadVoices = () => {
         if (synth.current) {
           const v = synth.current.getVoices();
-          // This will log the actual names of the 3 voices to your console
-          console.log(
-            'Architect Voice Probe - Available Voices:',
-            v.map((v) => `${v.name} (${v.lang})`),
-          );
         }
       };
 
@@ -63,13 +58,6 @@ export const useSpeech = () => {
 
       window.speechSynthesis.resume();
       window.speechSynthesis.speak(utterance);
-
-      console.log('Architect TTS Debug:', {
-        input: text,
-        speaking: textToSpeak,
-        voiceName: zhVoice?.name || 'NONE - Falling back to English',
-        lang: utterance.lang,
-      });
     }, 100);
   }, []);
 

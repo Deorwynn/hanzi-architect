@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 
-export const useRandomCharacter = (onSuccess: (char: string) => void) => {
+export const useRandomCharacter = (
+  onSuccess: (char: string) => void,
+  scriptPref: string,
+) => {
   const [isShuffling, setIsShuffling] = useState(false);
 
   const triggerShuffle = async () => {
@@ -9,7 +12,9 @@ export const useRandomCharacter = (onSuccess: (char: string) => void) => {
 
     setIsShuffling(true);
     try {
-      const randomData = await invoke<any>('get_random_character');
+      const randomData = await invoke<any>('get_random_character', {
+        scriptPref: scriptPref,
+      });
 
       if (randomData?.character) {
         onSuccess(randomData.character);
