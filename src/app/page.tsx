@@ -67,7 +67,7 @@ export default function HanziArchitect() {
   // Initialize Random Hook
   const { triggerShuffle, isShuffling } = useRandomCharacter((char) => {
     performSearch(char);
-  });
+  }, scriptPreference);
 
   // Load Session and History on Mount
   useEffect(() => {
