@@ -1,6 +1,7 @@
 'use client';
 import { CharacterData } from '@/types/database';
 import { ModalShell } from './ModalShell';
+import { cleanPinyin } from '@/utils/textUtils';
 
 interface RelationshipModalProps {
   isOpen: boolean;
@@ -32,7 +33,7 @@ export default function RelationshipModal(props: RelationshipModalProps) {
             className="group relative aspect-square flex flex-col items-center justify-center bg-[#161f27] border border-dashed border-cyan-500/10 rounded hover:border-cyan-500/50 transition-all hover:bg-cyan-500/5 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 cursor-pointer"
           >
             <span className="text-[10px] text-cyan-500/40 uppercase tracking-tighter mb-0.5 z-10">
-              {item.pinyin?.replace(/[0-9]/g, '') || '??'}
+              {cleanPinyin(item.pinyin)}
             </span>
             <span
               lang="zh-CN"

@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useCallback, useRef } from 'react';
+import { cleanPinyin } from '@/utils/textUtils';
 
 export const useSpeech = () => {
   const synth = useRef<SpeechSynthesis | null>(null);
@@ -39,7 +40,7 @@ export const useSpeech = () => {
 
       // If no Chinese voice, use pinyin without tones and fallback to English
       if (!zhVoice) {
-        textToSpeak = pinyin ? pinyin.replace(/[0-9]/g, '') : text;
+        textToSpeak = pinyin ? cleanPinyin(pinyin) : text;
         targetLang = 'en-US';
       }
 
