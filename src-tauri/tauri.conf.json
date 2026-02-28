@@ -12,11 +12,12 @@
   "app": {
     "windows": [
       {
-        "title": "hanzi-architect",
-        "width": 800,
-        "height": 600,
+        "label": "main",
+        "title": "Hanzi Architect",
+        "width": 1200,
+        "height": 900,
         "resizable": true,
-        "fullscreen": false
+        "center": true
       }
     ],
     "security": {
