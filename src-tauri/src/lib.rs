@@ -393,6 +393,27 @@ pub fn run() {
                 ])
                 .build(),
         )
+        // --- WINDOW MANAGEMENT ---
+        .setup(|app| {
+            if let Some(window) = app.get_webview_window("main") {
+                // Get the monitor the window is on or default to the primary monitor
+                if let Ok(Some(monitor)) = window.primary_monitor() {
+                    let size = monitor.size();
+                    
+                    // Calculate a comfortable "native" feel: 70% width, 80% height
+                    let mut width = size.width as f64 * 0.7;
+                    let mut height = size.height as f64 * 0.8;
+
+                    // Safety Clamping: Ensure the UI doesn't break on low-res displays
+                    if width < 1000.0 { width = 1000.0; }
+                    if height < 700.0 { height = 700.0; }
+                    
+                    let _ = window.set_size(tauri::LogicalSize::new(width, height));
+                    let _ = window.center();
+                }
+            }
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             initialize_database,
             get_character_details,
