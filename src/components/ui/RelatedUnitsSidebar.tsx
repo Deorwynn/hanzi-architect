@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { CharacterData } from '../../types/database';
+import { cleanPinyin } from '@/utils/textUtils';
 
 interface RelatedUnitsSidebarProps {
   radical: string;
@@ -176,9 +177,8 @@ export default function RelatedUnitsSidebar({
           /* DATA FOUND STATE */
           <>
             {displayedRelated.map((item) => {
-              const safePinyin = item.pinyin
-                ? item.pinyin.replace(/[0-9]/g, '')
-                : '??';
+              const safePinyin = cleanPinyin(item.pinyin);
+
               const firstDef = item.definition
                 ? item.definition.split(/[;/,]/)[0]
                 : 'No definition';
