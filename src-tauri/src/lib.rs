@@ -150,6 +150,73 @@ async fn initialize_database(handle: tauri::AppHandle) -> Result<String, String>
 }
 
 #[tauri::command]
+async fn search_characters(
+    handle: AppHandle, 
+    query: String, 
+    filter_hanzi_only: bool,
+    script_pref: String
+) -> Result<Vec<CharacterData>, String> {
+    let db_path = get_db_path(&handle)?;
+    let conn = Connection::open_with_flags(&db_path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
+        .map_err(|e| e.to_string())?;
+
+    let clean_query = query.trim().to_lowercase();
+    
+    // If the query is a single Chinese character, we BYPASS the script filter
+    // so variants and components always load regardless of settings.
+    let is_direct_char = clean_query.chars().count() == 1 && 
+                         clean_query.chars().next().unwrap() > '\u{2E80}';
+
+    let script_filter = if is_direct_char {
+        "".to_string() 
+    } else {
+        match script_pref.as_str() {
+            "Simplified" => "AND (script_type = 'Simplified' OR script_type = 'Universal')".to_string(),
+            "Traditional" => "AND (script_type = 'Traditional' OR script_type = 'Universal')".to_string(),
+            _ => "".to_string(),
+        }
+    };
+
+    let starts_with = format!("{}%", clean_query);
+    let contains = format!("%{}%", clean_query);
+
+    let mut sql = format!(
+        "SELECT {} FROM characters 
+         WHERE (character = ?1 OR pinyin LIKE ?2 OR pinyin LIKE ?3)
+         {}", 
+        SELECT_FIELDS, script_filter
+    );
+
+    if filter_hanzi_only {
+        sql.push_str(" AND LENGTH(character) = 1");
+    }
+
+sql.push_str(" ORDER BY 
+    CASE 
+        WHEN character = ?1 THEN 1
+        WHEN pinyin = ?1 THEN 2
+        WHEN pinyin LIKE ?2 THEN 3
+        ELSE 4 
+    END, 
+    COALESCE(hsk_level, 10) ASC, -- HSK1 (1) is better than HSK6 (6) or Unknown (10)
+    character ASC 
+    LIMIT 50");
+
+    let mut stmt = conn.prepare(&sql).map_err(|e| e.to_string())?;
+    let rows = stmt.query_map(
+        params![&clean_query, &starts_with, &contains], 
+        |row| map_row_to_character(row)
+    ).map_err(|e| e.to_string())?;
+
+    let mut results = Vec::new();
+    for row in rows {
+        results.push(row.map_err(|e| e.to_string())?);
+    }
+
+    Ok(results)
+}
+
+#[tauri::command]
 fn get_character_details(handle: AppHandle, target: String) -> Result<CharacterData, String> {
     let db_path = get_db_path(&handle)?;
     let conn = Connection::open_with_flags(&db_path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
@@ -416,6 +483,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             initialize_database,
+            search_characters,
             get_character_details,
             get_component_details,
             get_random_character,
