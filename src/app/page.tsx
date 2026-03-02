@@ -11,12 +11,12 @@ import CharacterMetadata from '@/components/ui/metadata/CharacterMetadata';
 import { useRandomCharacter } from '../hooks/useRandomCharacter';
 import RelatedUnitsSidebar from '@/components/ui/RelatedUnitsSidebar';
 import RelationshipModal from '@/components/ui/RelationshipModal';
+import SearchBar from '@/components/ui/SearchBar';
 import { useSettings } from '@/context/SettingsContext';
 
 type RelationshipMode = 'Radical' | 'Sound' | 'HSK';
 
 export default function HanziArchitect() {
-  const [searchQuery, setSearchQuery] = useState('');
   const [characterData, setCharacterData] = useState<CharacterData | null>(
     null,
   );
@@ -30,41 +30,62 @@ export default function HanziArchitect() {
   const [modalTitle, setModalTitle] = useState('');
   const { scriptPreference } = useSettings();
 
-  /**
-   * CENTRALIZED FETCH LOGIC
-   */
-  const performSearch = useCallback(async (target: string) => {
-    if (!target.trim()) return;
-
-    setLoading(true);
-    setError('');
-
-    try {
-      const result = await invoke<CharacterData>('get_character_details', {
-        target: target.trim(),
-      });
-
-      setCharacterData(result);
-      localStorage.setItem('hanzi_last_session', JSON.stringify(result));
-
-      setHistory((prev) => {
-        const filtered = prev.filter(
-          (item) => item.character !== result.character,
-        );
-        const newHistory = [result, ...filtered].slice(0, 10);
-        localStorage.setItem('hanzi_history', JSON.stringify(newHistory));
-        return newHistory;
-      });
-
-      setSearchQuery('');
-    } catch (err) {
-      setError(`Character "${target}" not found in records.`);
-    } finally {
-      setLoading(false);
-    }
+  const updateUI = useCallback((data: CharacterData) => {
+    setCharacterData(data);
+    setHistory((prev) => {
+      const filtered = prev.filter((item) => item.character !== data.character);
+      const newHistory = [data, ...filtered].slice(0, 10);
+      localStorage.setItem('hanzi_history', JSON.stringify(newHistory));
+      return newHistory;
+    });
+    localStorage.setItem('hanzi_last_session', JSON.stringify(data));
   }, []);
 
-  // Initialize Random Hook
+  const performSearch = useCallback(
+    async (target: string) => {
+      const cleanTarget = target.trim();
+      if (!cleanTarget) return;
+
+      setLoading(true);
+      setError('');
+
+      try {
+        const results = await invoke<CharacterData[]>('search_characters', {
+          query: cleanTarget,
+          filterHanziOnly: true,
+          scriptPref: scriptPreference,
+        });
+
+        if (results.length === 0) {
+          const retry = await invoke<CharacterData[]>('search_characters', {
+            query: cleanTarget,
+            filterHanziOnly: true,
+            scriptPref: 'Both',
+          });
+
+          if (retry.length > 0) {
+            const match =
+              retry.find((r) => r.character === cleanTarget) || retry[0];
+            updateUI(match);
+            return;
+          }
+
+          setError(`No results found for "${cleanTarget}".`);
+          return;
+        }
+
+        const exactMatch =
+          results.find((r) => r.character === cleanTarget) || results[0];
+        updateUI(exactMatch);
+      } catch (err) {
+        setError(`System error.`);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [scriptPreference, updateUI],
+  );
+
   const { triggerShuffle, isShuffling } = useRandomCharacter((char) => {
     performSearch(char);
   }, scriptPreference);
@@ -98,25 +119,42 @@ export default function HanziArchitect() {
     localStorage.removeItem('hanzi_last_session');
   }, []);
 
-  // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (document.activeElement?.tagName === 'INPUT') return;
+      if (
+        document.activeElement?.tagName === 'INPUT' ||
+        document.activeElement?.tagName === 'TEXTAREA'
+      )
+        return;
+
       const key = e.key.toLowerCase();
-
       if (key === 'r') triggerShuffle();
-      if (key === 'v' && characterData?.variants) {
-        performSearch(characterData.variants);
-      }
 
-      if (key === 'escape') clearHistory();
+      if (key === 'v') {
+        const targetVariant =
+          characterData?.script_type === 'Simplified'
+            ? characterData?.traditional_variant
+            : characterData?.simplified_variant;
+
+        if (targetVariant) performSearch(targetVariant);
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [triggerShuffle, characterData, performSearch, clearHistory]);
+  }, [triggerShuffle, characterData, performSearch]);
 
-  // Handlers
+  const selectCharacter = useCallback((data: CharacterData) => {
+    setCharacterData(data);
+    setError('');
+
+    setHistory((prev) => {
+      const filtered = prev.filter((item) => item.character !== data.character);
+      return [data, ...filtered].slice(0, 10);
+    });
+    localStorage.setItem('hanzi_last_session', JSON.stringify(data));
+  }, []);
+
   const handleComponentClick = (char: string) => performSearch(char);
 
   return (
@@ -135,32 +173,15 @@ export default function HanziArchitect() {
             </p>
           </div>
 
-          <div className="flex-1 max-w-xl w-full">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                performSearch(searchQuery);
-              }}
-              className="relative"
-            >
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  if (error) setError('');
-                }}
-                placeholder="Search..."
-                className="w-full bg-[#161f27] border border-cyan-500/20 px-4 py-2 rounded outline-none focus:border-cyan-500/50 text-cyan-100 transition-all"
-              />
-              <button
-                type="submit"
-                className="absolute right-3 top-2 opacity-50 hover:opacity-100"
-              >
-                🔍
-              </button>
-            </form>
-          </div>
+          <SearchBar
+            onSelect={selectCharacter}
+            hanziOnly={true}
+            onOpenExpandedView={(title: string, data: CharacterData[]) => {
+              setModalTitle(title);
+              setModalCharacters(data);
+              setIsModalOpen(true);
+            }}
+          />
 
           <button
             onClick={triggerShuffle}
